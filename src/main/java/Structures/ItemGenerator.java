@@ -22,7 +22,7 @@ public class ItemGenerator<Type> {
      */
     public Item<Type> newItem(Type value) {
         if(this.getType() != value.getClass()) {
-            throw new TypeMismatchException(String.format("Cannot generate Item<%s> to ItemSet<%s>", value.getClass(), this.getType()));
+            throw new TypeMismatchException(String.format("Cannot generate Item<%s> from Generator<%s>", value.getClass(), this.getType()));
         }
         return new Item<Type>(value, type);
     }
