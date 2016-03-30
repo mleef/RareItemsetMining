@@ -33,13 +33,4 @@ public class ItemSet<Type> extends HashSet<Item> {
     public Class<Type> getType() {
         return type;
     }
-
-    public static void main(String[] args) {
-        ItemSet<String> is = new ItemSet<String>(String.class);
-        ItemGenerator<String> gen = new ItemGenerator<String>(String.class);
-
-        is.add(gen.newItem("marc"));
-        is.add(gen.newItem("robert"));
-        is.add(gen.newItem("mikkel"));
-    }
 }
