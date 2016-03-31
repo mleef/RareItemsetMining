@@ -10,6 +10,7 @@ public class Item<Type> implements Comparable<Item<Type>> {
     private final Class<Type> type; // Class of type
 
     /**
+     * Constructor with no support
      * @param val Item value
      * @param type Item type
      */
@@ -20,6 +21,19 @@ public class Item<Type> implements Comparable<Item<Type>> {
     }
 
     /**
+     * Constructor with support
+     * @param val Item value
+     * @param support Support of item
+     * @param type Item type
+     */
+    public Item(Type val, int support, Class<Type> type) {
+        this.value = val;
+        this.type = type;
+        this.support = support;
+    }
+
+    /**
+     * Support based comparison
      * @param that Target item to compare
      * @return Positive, negative, and zero for greater than, less than, and equal
      */
@@ -28,6 +42,7 @@ public class Item<Type> implements Comparable<Item<Type>> {
     }
 
     /**
+     * Get type of item
      * @return Type of item
      */
     public Class<Type> getType() {
@@ -35,10 +50,19 @@ public class Item<Type> implements Comparable<Item<Type>> {
     }
 
     /**
+     * Set item support
      * @param support Frequency of item
      */
     public void setSupport(int support) {
         this.support = support;
+    }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "value=" + value +
+                ", support=" + support +
+                '}';
     }
 
     @Override

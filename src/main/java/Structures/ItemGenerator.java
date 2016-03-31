@@ -17,14 +17,34 @@ public class ItemGenerator<Type> {
     }
 
     /**
+     * Generates new item based on value
      * @param value Value of item to create
      * @return Newly constructed item with given value and type
      */
     public Item<Type> newItem(Type value) {
+        checkType(value);
+        return new Item<Type>(value, type);
+    }
+
+    /**
+     * Generates new value based on value and support
+     * @param value Value of item to create
+     * @param support Frequency of item to create
+     * @return Newly constructed item with given value and type
+     */
+    public Item<Type> newItem(Type value, int support) {
+        checkType(value);
+        return new Item<Type>(value, support, type);
+    }
+
+    /**
+     * Validates that value matches type of generator
+     * @param value Type to validate
+     */
+    private void checkType(Type value) {
         if(this.getType() != value.getClass()) {
             throw new TypeMismatchException(String.format("Cannot generate Item<%s> from Generator<%s>", value.getClass(), this.getType()));
         }
-        return new Item<Type>(value, type);
     }
 
     /**
