@@ -61,7 +61,6 @@ public class Item<Type> implements Comparable<Item<Type>> {
     public String toString() {
         return "Item{" +
                 "value=" + value +
-                ", support=" + support +
                 '}';
     }
 

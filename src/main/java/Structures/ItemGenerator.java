@@ -38,6 +38,14 @@ public class ItemGenerator<Type> {
     }
 
     /**
+     * Generates new item set of the associated type
+     * @return New item set of the same type as the generator
+     */
+    public ItemSet<Type> newItemSet() {
+        return new ItemSet<Type>(type);
+    }
+
+    /**
      * Validates that value matches type of generator
      * @param value Type to validate
      */
