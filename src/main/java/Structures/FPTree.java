@@ -1,10 +1,7 @@
 package Structures;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Random;
 
 /**
  * Created by marcleef on 3/29/16.
@@ -12,7 +9,7 @@ import java.util.Random;
  */
 public class FPTree<Type> {
     private FPNode<Type> root;
-    private ArrayList<ItemSet<Type>> itemSets;
+    private List<ItemSet<Type>> itemSets;
     private final ConcurrentHashMap<Item<Type>, Integer> itemSupports; // To track item frequencies
 
     /**
@@ -20,7 +17,7 @@ public class FPTree<Type> {
      */
     public FPTree() {
         this.root = new FPNode<Type>(null, null, null);
-        this.itemSets = new ArrayList<ItemSet<Type>>();
+        this.itemSets = Collections.synchronizedList(new ArrayList<ItemSet<Type>>());
         this.itemSupports = new ConcurrentHashMap<Item<Type>, Integer>();
     }
 
