@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FPTree<Type> {
     private FPNode<Type> root;
-    private List<ItemSet<Type>> itemSets;
+    private final List<ItemSet<Type>> itemSets;
     private final ConcurrentHashMap<Item<Type>, Integer> itemSupports; // To track item frequencies
 
     /**
@@ -37,8 +37,10 @@ public class FPTree<Type> {
      * Constructs FP tree by inserting each stored itemset into the tree
      */
     public void build() {
-        for(ItemSet<Type> itemSet : itemSets) {
-            insert(itemSet.supportOrder());
+        synchronized (itemSets) {
+            for(ItemSet<Type> itemSet : itemSets) {
+                insert(itemSet.supportOrder());
+            }
         }
     }
 
