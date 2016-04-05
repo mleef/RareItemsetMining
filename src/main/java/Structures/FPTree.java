@@ -11,6 +11,7 @@ public class FPTree<Type> {
     private FPNode<Type> root;
     private final List<ItemSet<Type>> itemSets;
     private final ConcurrentHashMap<Item<Type>, Integer> itemSupports; // To track item frequencies
+    private final ConcurrentHashMap<Item<Type>, FPNode<Type>> neighbors;
 
     /**
      * Constructor
@@ -19,6 +20,7 @@ public class FPTree<Type> {
         this.root = new FPNode<Type>(null, null, null);
         this.itemSets = Collections.synchronizedList(new ArrayList<ItemSet<Type>>());
         this.itemSupports = new ConcurrentHashMap<Item<Type>, Integer>();
+        this.neighbors = new ConcurrentHashMap<Item<Type>, FPNode<Type>>();
     }
 
     /**
@@ -38,8 +40,11 @@ public class FPTree<Type> {
      */
     public void build() {
         synchronized (itemSets) {
-            for(ItemSet<Type> itemSet : itemSets) {
-                insert(itemSet.supportOrder());
+            // Insert each item set into tree before removing
+            Iterator<ItemSet<Type>> itemSetIterator = itemSets.iterator();
+            while(itemSetIterator.hasNext()) {
+                insert(itemSetIterator.next().supportOrder());
+                itemSetIterator.remove();
             }
         }
     }
@@ -51,15 +56,39 @@ public class FPTree<Type> {
     public void insert(ArrayList<Item<Type>> itemSet) {
         FPNode<Type> current = root;
         for(Item<Type> item : itemSet) {
+            // If child with matching item exists, update support
             if(current.children.containsKey(item)) {
                 current.children.get(item).support++;
                 current = current.children.get(item);
             } else {
+                // Create new node with associated item and update neighboring links
                 FPNode<Type> newNode = new FPNode<Type>(null, item, current);
                 current.children.put(item, newNode);
+                updateNeighborLinks(newNode);
                 current = newNode;
             }
+
         }
+    }
+
+    /**
+     * Constructs list of all nodes in the tree with the same item
+     * @param item Contained item in nodes to match
+     * @return List of nodes containing matching item
+     */
+    private ArrayList<FPNode<Type>> getNodesByItem(Item<Type> item) {
+        ArrayList<FPNode<Type>> neighboringNodes = new ArrayList<FPNode<Type>>();
+        if(!neighbors.containsKey(item)) {
+            return neighboringNodes;
+        } else {
+            FPNode<Type> currentNeighbor = neighbors.get(item);
+            while(currentNeighbor != null) {
+                neighboringNodes.add(currentNeighbor);
+                currentNeighbor = currentNeighbor.neighbor;
+            }
+        }
+        return neighboringNodes;
+
     }
 
     /**
@@ -90,6 +119,23 @@ public class FPTree<Type> {
         }
     }
 
+    /**
+     * Updates links between nodes that possess the same item
+     * @param node Node to add to end of chain
+     */
+    private void updateNeighborLinks(FPNode<Type> node) {
+        if(!neighbors.containsKey(node.item)) {
+            neighbors.put(node.item, node);
+        } else {
+            FPNode<Type> cur = neighbors.get(node.item);
+            while(cur.neighbor != null) {
+                cur = cur.neighbor;
+            }
+            cur.neighbor = node;
+        }
+
+    }
+
     public static void main(String[] args) {
         FPTree<Character> fp = new FPTree<Character>();
         ItemGenerator<Character> gen = new ItemGenerator<Character>(Character.class);
@@ -104,6 +150,13 @@ public class FPTree<Type> {
         }
 
         fp.build();
+
+        System.out.println("Links of nodes containing item 'g':");
+        for(FPNode<Character> node : fp.getNodesByItem(gen.newItem('g'))) {
+            System.out.println(node);
+        }
+        System.out.println();
+        System.out.println("Level order traversal:");
         fp.levelOrder();
 
     }

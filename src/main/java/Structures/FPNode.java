@@ -8,15 +8,15 @@ import java.util.HashMap;
  * Nodes in the FP tree
  */
 public class FPNode<Type> {
-    private Item<Type> value; // Item stored in node
+    public Item<Type> item; // Item stored in node
     private FPNode<Type> parent; // Parent of node
-    private FPNode<Type> neighbor; // Next occurrence of Item in tree
+    public FPNode<Type> neighbor; // Next occurrence of Item in tree
     public HashMap<Item<Type>, FPNode<Type>> children; // Children of node
     public int support; // Frequency of path occurrence
 
-    public FPNode(FPNode<Type> neighbor, Item<Type> value, FPNode<Type> parent) {
+    public FPNode(FPNode<Type> neighbor, Item<Type> item, FPNode<Type> parent) {
         this.neighbor = neighbor;
-        this.value = value;
+        this.item = item;
         this.parent = parent;
         this.children = new HashMap<Item<Type>, FPNode<Type>>();
         this.support = 1;
@@ -29,20 +29,20 @@ public class FPNode<Type> {
 
         FPNode<?> fpNode = (FPNode<?>) o;
 
-        return value.equals(fpNode.value);
+        return item.equals(fpNode.item);
 
     }
 
     @Override
     public String toString() {
         return "FPNode{" +
-                "value=" + value +
+                "item=" + item +
                 ", support=" + support +
                 '}';
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return item.hashCode();
     }
 }
