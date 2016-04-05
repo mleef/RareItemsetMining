@@ -39,7 +39,7 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
 
     /**
      * Orders items by support
-     * @return Items in set ordered by support (least to greatest)
+     * @return Items in set ordered by support (Greatest to least)
      */
     public ArrayList<Item<Type>> supportOrder() {
         ArrayList<Item<Type>> sortedItems = new ArrayList<Item<Type>>(this);
