@@ -13,6 +13,7 @@ import java.util.HashSet;
  */
 public class ItemSet<Type> extends HashSet<Item<Type>> {
     private final Class<Type> type;
+    private int support;
 
     /**
      * Constructor
@@ -20,6 +21,7 @@ public class ItemSet<Type> extends HashSet<Item<Type>> {
      */
     public ItemSet(Class<Type> type) {
         this.type = type;
+        this.support = 0;
     }
 
     @Override
@@ -42,6 +44,14 @@ public class ItemSet<Type> extends HashSet<Item<Type>> {
         ArrayList<Item<Type>> sortedItems = new ArrayList<Item<Type>>(this);
         Collections.sort(sortedItems);
         return sortedItems;
+    }
+
+    /**
+     * Set item set support
+     * @param support Frequency of item set
+     */
+    public void setSupport(int support) {
+        this.support = support;
     }
 
     /**

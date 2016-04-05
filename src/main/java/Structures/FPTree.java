@@ -203,6 +203,7 @@ public class FPTree<Type> {
         fp.levelOrder();
 
         /*
+        // Randomly generate 1000 item sets and populate the tree
         Random r = new Random();
         for(int i = 0; i < 1000; i++) {
             ItemSet<Character> itemSet = gen.newItemSet();
