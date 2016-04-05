@@ -17,7 +17,7 @@ public class FPTree<Type> {
      * Constructor
      */
     public FPTree() {
-        this.root = new FPNode<Type>(null, null, null);
+        this.root = new FPNode<Type>(null, null);
         this.itemSets = Collections.synchronizedList(new ArrayList<ItemSet<Type>>());
         this.itemSupports = new ConcurrentHashMap<Item<Type>, Integer>();
         this.neighbors = new ConcurrentHashMap<Item<Type>, FPNode<Type>>();
@@ -31,7 +31,7 @@ public class FPTree<Type> {
         if(itemSet == null) {
             throw new NullPointerException("ItemSet cannot be null");
         }
-        updateCounts(itemSet);
+        updateGlobalSupports(itemSet);
         itemSets.add(itemSet);
     }
 
@@ -43,7 +43,9 @@ public class FPTree<Type> {
             // Insert each item set into tree before removing
             Iterator<ItemSet<Type>> itemSetIterator = itemSets.iterator();
             while(itemSetIterator.hasNext()) {
-                insert(itemSetIterator.next().supportOrder());
+                ItemSet<Type> itemSet = itemSetIterator.next();
+                updateItemSupports(itemSet);
+                insert(itemSet.supportOrder());
                 itemSetIterator.remove();
             }
         }
@@ -62,7 +64,7 @@ public class FPTree<Type> {
                 current = current.children.get(item);
             } else {
                 // Create new node with associated item and update neighboring links
-                FPNode<Type> newNode = new FPNode<Type>(null, item, current);
+                FPNode<Type> newNode = new FPNode<Type>(item, current);
                 current.children.put(item, newNode);
                 updateNeighborLinks(newNode);
                 current = newNode;
@@ -110,12 +112,22 @@ public class FPTree<Type> {
      * Updates tree wide item supports
      * @param itemSet ItemSet to update counts with
      */
-    private void updateCounts(ItemSet<Type> itemSet) {
+    private void updateGlobalSupports(ItemSet<Type> itemSet) {
         for(Item<Type> item : itemSet) {
             if(!itemSupports.containsKey(item)) {
                 itemSupports.put(item, 0);
             }
             itemSupports.put(item, itemSupports.get(item) + 1);
+        }
+    }
+
+    /**
+     * Updates support of item objects to reflect global counts
+     * @param itemSet ItemSet of items to be modified
+     */
+    private void updateItemSupports(ItemSet<Type> itemSet) {
+        for(Item<Type> item : itemSet) {
+            item.setSupport(itemSupports.get(item));
         }
     }
 
@@ -137,10 +149,60 @@ public class FPTree<Type> {
     }
 
     public static void main(String[] args) {
+
         FPTree<Character> fp = new FPTree<Character>();
         ItemGenerator<Character> gen = new ItemGenerator<Character>(Character.class);
-        Random r = new Random();
 
+        // Testing sample tree from https://en.wikibooks.org/wiki/Data_Mining_Algorithms_In_R/Frequent_Pattern_Mining/The_FP-Growth_Algorithm#cite_note-CorneliaRobert-5
+        ItemSet<Character> is1 = gen.newItemSet();
+        ItemSet<Character> is2 = gen.newItemSet();
+        ItemSet<Character> is3 = gen.newItemSet();
+        ItemSet<Character> is4 = gen.newItemSet();
+        ItemSet<Character> is5 = gen.newItemSet();
+        ItemSet<Character> is6 = gen.newItemSet();
+
+        is1.add(gen.newItem('A'));
+        is1.add(gen.newItem('B'));
+        is1.add(gen.newItem('D'));
+        is1.add(gen.newItem('E'));
+
+        is2.add(gen.newItem('B'));
+        is2.add(gen.newItem('C'));
+        is2.add(gen.newItem('E'));
+
+        is3.add(gen.newItem('A'));
+        is3.add(gen.newItem('B'));
+        is3.add(gen.newItem('D'));
+        is3.add(gen.newItem('E'));
+
+        is4.add(gen.newItem('A'));
+        is4.add(gen.newItem('B'));
+        is4.add(gen.newItem('C'));
+        is4.add(gen.newItem('E'));
+
+        is5.add(gen.newItem('A'));
+        is5.add(gen.newItem('B'));
+        is5.add(gen.newItem('C'));
+        is5.add(gen.newItem('D'));
+        is5.add(gen.newItem('E'));
+
+        is6.add(gen.newItem('B'));
+        is6.add(gen.newItem('C'));
+        is6.add(gen.newItem('D'));
+
+
+        fp.addItemSet(is1);
+        fp.addItemSet(is2);
+        fp.addItemSet(is3);
+        fp.addItemSet(is4);
+        fp.addItemSet(is5);
+        fp.addItemSet(is6);
+
+        fp.build();
+        fp.levelOrder();
+
+        /*
+        Random r = new Random();
         for(int i = 0; i < 1000; i++) {
             ItemSet<Character> itemSet = gen.newItemSet();
             for(int j = 0; j < r.nextInt(10); j++) {
@@ -158,6 +220,7 @@ public class FPTree<Type> {
         System.out.println();
         System.out.println("Level order traversal:");
         fp.levelOrder();
+        */
 
     }
 }

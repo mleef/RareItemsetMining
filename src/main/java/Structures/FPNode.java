@@ -14,8 +14,7 @@ public class FPNode<Type> {
     public HashMap<Item<Type>, FPNode<Type>> children; // Children of node
     public int support; // Frequency of path occurrence
 
-    public FPNode(FPNode<Type> neighbor, Item<Type> item, FPNode<Type> parent) {
-        this.neighbor = neighbor;
+    public FPNode(Item<Type> item, FPNode<Type> parent) {
         this.item = item;
         this.parent = parent;
         this.children = new HashMap<Item<Type>, FPNode<Type>>();

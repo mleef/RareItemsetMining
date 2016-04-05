@@ -38,7 +38,7 @@ public class Item<Type> implements Comparable<Item<Type>> {
      * @return Positive, negative, and zero for greater than, less than, and equal
      */
     public int compareTo(Item<Type> that) {
-        return this.support - that.support;
+        return that.support - this.support;
     }
 
     /**
