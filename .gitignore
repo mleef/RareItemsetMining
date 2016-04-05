@@ -1,0 +1,8 @@
+# Ignore the library xml files
+.idea/libraries/*
+
+# Ignore the result folder
+res/*
+
+# Ignore the compiled classes
+target/*

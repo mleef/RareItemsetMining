@@ -1,5 +1,6 @@
 package Structures;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -8,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by marcleef on 3/29/16.
  * Frequent Pattern tree construction and querying operations
  */
-public class FPTree<Type> {
+public class FPTree<Type> implements Serializable {
     private FPNode<Type> root;
     private final List<ItemSet<Type>> itemSets;
     private final ConcurrentHashMap<Item<Type>, Integer> itemSupports; // To track item frequencies
@@ -40,6 +41,7 @@ public class FPTree<Type> {
      * Constructs FP tree by inserting each stored itemset into the tree
      */
     public void build() {
+        System.out.println("Building tree:  " + itemSets);
         synchronized (itemSets) {
             // Insert each item set into tree before removing
             Iterator<ItemSet<Type>> itemSetIterator = itemSets.iterator();
@@ -49,6 +51,8 @@ public class FPTree<Type> {
                 insert(itemSet.supportOrder());
                 itemSetIterator.remove();
             }
+
+            levelOrder();
         }
     }
 

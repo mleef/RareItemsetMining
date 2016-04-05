@@ -1,5 +1,6 @@
 package Structures;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.HashMap;
 
@@ -7,7 +8,7 @@ import java.util.HashMap;
  * Created by marcleef on 3/29/16.
  * Nodes in the FP tree
  */
-public class FPNode<Type> {
+public class FPNode<Type> implements Serializable {
     public Item<Type> item; // Item stored in node
     private FPNode<Type> parent; // Parent of node
     public FPNode<Type> neighbor; // Next occurrence of Item in tree

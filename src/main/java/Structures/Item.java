@@ -1,10 +1,12 @@
 package Structures;
 
+import java.io.Serializable;
+
 /**
  * Created by marcleef on 3/29/16.
  * Item definition and basic typing functionality
  */
-public class Item<Type> implements Comparable<Item<Type>> {
+public class Item<Type> implements Comparable<Item<Type>>, Serializable {
     private Type value; // Item type
     private int support; // Item frequency
     private final Class<Type> type; // Class of type

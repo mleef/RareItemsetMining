@@ -2,6 +2,7 @@ package Structures;
 
 import com.sun.corba.se.impl.io.TypeMismatchException;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.TreeSet;
@@ -11,7 +12,7 @@ import java.util.HashSet;
  * Created by marcleef on 3/29/16.
  * HashSet wrapper for item grouping
  */
-public class ItemSet<Type> extends HashSet<Item<Type>> {
+public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
     private final Class<Type> type;
     private int support;
 
