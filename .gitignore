@@ -1,5 +1,6 @@
 # Ignore the library xml files
 .idea/libraries/*
+.idea/*
 
 # Ignore the result folder
 res/*
