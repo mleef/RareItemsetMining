@@ -9,6 +9,8 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.*;
+import org.apache.spark.streaming.*;
+import org.apache.spark.streaming.api.java.*;
 import scala.Tuple2;
 
 import java.io.Serializable;
@@ -19,6 +21,7 @@ import java.util.Set;
 
 /**
  * Created by mikkelKringelbach on 4/5/16.
+ * Encapsulates streaming and mining logic
  */
 public class RareItemSetMiner implements Serializable {
 
@@ -27,7 +30,7 @@ public class RareItemSetMiner implements Serializable {
     ItemSetMiner<String> itemSetMiner;
 
     public RareItemSetMiner() {
-        this.itemSetMiner = new FPItemSetMiner<String>();
+        this.itemSetMiner = new FPItemSetMiner<>();
     }
 
 
@@ -36,6 +39,7 @@ public class RareItemSetMiner implements Serializable {
 
         // Setup the Spark context
         SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
+        JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
         JavaSparkContext context = new JavaSparkContext(conf);
 
         // Setup the miner
@@ -45,12 +49,11 @@ public class RareItemSetMiner implements Serializable {
         JavaRDD<String> file = context.textFile(inputFileName);
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map(this::itemSetFromLine);
-
         itemSetJavaRDD.foreach(miner::addItemSet);
-
-
-
         Set<ItemSet<String>> result = miner.mine(0, 10);
+
+        // Create a DStream that will connect to hostname:port, like localhost:9999
+        // JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
 
         System.out.println("Result: \n " + result);
     }
@@ -77,7 +80,7 @@ public class RareItemSetMiner implements Serializable {
         ItemSet<String> itemSet = new ItemSet<>(String.class);
 
         for (String item : items) {
-            itemSet.add(new Item<String>(item, String.class));
+            itemSet.add(new Item<>(item, String.class));
         }
 
         return itemSet;
