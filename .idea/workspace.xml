@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a4fb5760-5d65-46b8-b9d5-47447e17997a" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RareItemsetMining.iml" afterPath="$PROJECT_DIR$/RareItemsetMining.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Structures/FPItemSetMiner.java" afterPath="$PROJECT_DIR$/src/main/java/Structures/FPItemSetMiner.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Structures/FPTree.java" afterPath="$PROJECT_DIR$/src/main/java/Structures/FPTree.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/infrastructure/RareItemSetMiner.java" afterPath="$PROJECT_DIR$/src/main/java/infrastructure/RareItemSetMiner.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/infrastructure/examples/WordCount.java" afterPath="$PROJECT_DIR$/src/main/java/infrastructure/examples/WordCount.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/wikiExample.data" afterPath="$PROJECT_DIR$/data/wikiExample.data" />
     </list>
     <ignored path="rare-itemset-mining.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -551,7 +547,7 @@
       </extension>
       <option name="MAIN_CLASS_NAME" value="infrastructure.RareItemSetMiner" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="wikiExample.data res" />
+      <option name="PROGRAM_PARAMETERS" value="data/wikiExample.data res" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -1007,12 +1003,12 @@
       <workItem from="1459819493615" duration="142000" />
       <workItem from="1459819678653" duration="7000" />
       <workItem from="1459819731664" duration="691000" />
-      <workItem from="1459868713006" duration="8861000" />
+      <workItem from="1459868713006" duration="8980000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10061000" />
+    <option name="totallyTimeSpent" value="10180000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1639" height="1409" extended-state="0" />
@@ -1027,7 +1023,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936758" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27107063" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27107063" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
