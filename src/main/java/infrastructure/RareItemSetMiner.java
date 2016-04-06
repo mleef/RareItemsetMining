@@ -49,13 +49,13 @@ public class RareItemSetMiner implements Serializable {
         JavaRDD<String> file = context.textFile(inputFileName);
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map(this::itemSetFromLine);
-        itemSetJavaRDD.foreach(miner::addItemSet);
+        itemSetJavaRDD.collect().forEach(miner::addItemSet);
         Set<ItemSet<String>> result = miner.mine(0, 10);
 
         // Create a DStream that will connect to hostname:port, like localhost:9999
         // JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
 
-        System.out.println("Result: \n " + result);
+        System.out.println("Result: " + result);
     }
 
 
