@@ -1,7 +1,6 @@
-package Structures;
+package mining;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.HashMap;
 
 /**
@@ -18,7 +17,7 @@ public class FPNode<Type> implements Serializable {
     public FPNode(Item<Type> item, FPNode<Type> parent) {
         this.item = item;
         this.parent = parent;
-        this.children = new HashMap<Item<Type>, FPNode<Type>>();
+        this.children = new HashMap<>();
         this.support = 1;
     }
 

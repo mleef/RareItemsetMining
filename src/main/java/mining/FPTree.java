@@ -1,4 +1,4 @@
-package Structures;
+package mining;
 
 import java.io.Serializable;
 import java.util.*;
@@ -19,10 +19,10 @@ public class FPTree<Type> implements Serializable {
      * Constructor
      */
     public FPTree() {
-        this.root = new FPNode<Type>(null, null);
-        this.itemSets = Collections.synchronizedList(new ArrayList<ItemSet<Type>>());
-        this.itemSupports = new ConcurrentHashMap<Item<Type>, Integer>();
-        this.neighbors = new ConcurrentHashMap<Item<Type>, FPNode<Type>>();
+        this.root = new FPNode<>(null, null);
+        this.itemSets = Collections.synchronizedList(new ArrayList<>());
+        this.itemSupports = new ConcurrentHashMap<>();
+        this.neighbors = new ConcurrentHashMap<>();
     }
 
     /**
@@ -70,7 +70,7 @@ public class FPTree<Type> implements Serializable {
                 current = current.children.get(item);
             } else {
                 // Create new node with associated item and update neighboring links
-                FPNode<Type> newNode = new FPNode<Type>(item, current);
+                FPNode<Type> newNode = new FPNode<>(item, current);
                 current.children.put(item, newNode);
                 updateNeighborLinks(newNode);
                 current = newNode;
@@ -85,7 +85,7 @@ public class FPTree<Type> implements Serializable {
      * @return List of nodes containing matching item
      */
     private ArrayList<FPNode<Type>> getNodesByItem(Item<Type> item) {
-        ArrayList<FPNode<Type>> neighboringNodes = new ArrayList<FPNode<Type>>();
+        ArrayList<FPNode<Type>> neighboringNodes = new ArrayList<>();
         if(!neighbors.containsKey(item)) {
             return neighboringNodes;
         } else {
@@ -103,7 +103,7 @@ public class FPTree<Type> implements Serializable {
      * Prints the tree in level order
      */
     private void levelOrder() {
-        LinkedList<FPNode<Type>> queue = new LinkedList<FPNode<Type>>();
+        LinkedList<FPNode<Type>> queue = new LinkedList<>();
         queue.add(root);
         while(!queue.isEmpty()) {
             FPNode<Type> cur = queue.poll();
@@ -158,8 +158,8 @@ public class FPTree<Type> implements Serializable {
     //TODO Move this to a separate test class
     public static void main(String[] args) {
 
-        FPTree<Character> fp = new FPTree<Character>();
-        ItemGenerator<Character> gen = new ItemGenerator<Character>(Character.class);
+        FPTree<Character> fp = new FPTree<>();
+        ItemGenerator<Character> gen = new ItemGenerator<>(Character.class);
 
         // Testing sample tree from https://en.wikibooks.org/wiki/Data_Mining_Algorithms_In_R/Frequent_Pattern_Mining/The_FP-Growth_Algorithm#cite_note-CorneliaRobert-5
         ItemSet<Character> is1 = gen.newItemSet();

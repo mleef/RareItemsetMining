@@ -1,4 +1,4 @@
-package Structures;
+package mining;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -15,7 +15,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
      * Constructor
      */
     public FPItemSetMiner() {
-        this.tree = new FPTree<Type>();
+        this.tree = new FPTree<>();
     }
 
     /**

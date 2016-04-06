@@ -1,11 +1,10 @@
-package Structures;
+package mining;
 
 import com.sun.corba.se.impl.io.TypeMismatchException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.TreeSet;
 import java.util.HashSet;
 
 /**
@@ -42,7 +41,7 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
      * @return Items in set ordered by support (Greatest to least)
      */
     public ArrayList<Item<Type>> supportOrder() {
-        ArrayList<Item<Type>> sortedItems = new ArrayList<Item<Type>>(this);
+        ArrayList<Item<Type>> sortedItems = new ArrayList<>(this);
         Collections.sort(sortedItems);
         return sortedItems;
     }

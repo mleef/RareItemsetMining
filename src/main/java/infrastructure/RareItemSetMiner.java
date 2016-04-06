@@ -1,9 +1,9 @@
 package infrastructure;
 
-import Structures.FPItemSetMiner;
-import Structures.Item;
-import Structures.ItemSet;
-import Structures.ItemSetMiner;
+import mining.FPItemSetMiner;
+import mining.Item;
+import mining.ItemSet;
+import mining.ItemSetMiner;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;

@@ -1,4 +1,4 @@
-package Structures;
+package mining;
 
 import java.util.Set;
 

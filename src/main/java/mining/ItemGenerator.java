@@ -1,4 +1,4 @@
-package Structures;
+package mining;
 
 import com.sun.corba.se.impl.io.TypeMismatchException;
 
@@ -23,7 +23,7 @@ public class ItemGenerator<Type> {
      */
     public Item<Type> newItem(Type value) {
         checkType(value);
-        return new Item<Type>(value, type);
+        return new Item<>(value, type);
     }
 
     /**
@@ -34,7 +34,7 @@ public class ItemGenerator<Type> {
      */
     public Item<Type> newItem(Type value, int support) {
         checkType(value);
-        return new Item<Type>(value, support, type);
+        return new Item<>(value, support, type);
     }
 
     /**
@@ -42,7 +42,7 @@ public class ItemGenerator<Type> {
      * @return New item set of the same type as the generator
      */
     public ItemSet<Type> newItemSet() {
-        return new ItemSet<Type>(type);
+        return new ItemSet<>(type);
     }
 
     /**

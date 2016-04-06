@@ -1,5 +1,8 @@
-package Structures;
+package mining;
 
+import com.sun.istack.NotNull;
+
+import javax.annotation.Nonnull;
 import java.io.Serializable;
 
 /**
@@ -39,7 +42,7 @@ public class Item<Type> implements Comparable<Item<Type>>, Serializable {
      * @param that Target item to compare
      * @return Positive, negative, and zero for greater than, less than, and equal
      */
-    public int compareTo(Item<Type> that) {
+    public int compareTo(@Nonnull Item<Type> that) {
         return that.support - this.support;
     }
 
