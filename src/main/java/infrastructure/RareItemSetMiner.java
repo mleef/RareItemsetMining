@@ -5,18 +5,12 @@ import Structures.Item;
 import Structures.ItemSet;
 import Structures.ItemSetMiner;
 import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.*;
-import org.apache.spark.streaming.*;
-import org.apache.spark.streaming.api.java.*;
-import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -25,15 +19,14 @@ import java.util.Set;
  */
 public class RareItemSetMiner implements Serializable {
 
-
-    // Can we assume it will always be string?
+    //NOTE Can we assume it will always be string?
     ItemSetMiner<String> itemSetMiner;
 
     public RareItemSetMiner() {
         this.itemSetMiner = new FPItemSetMiner<>();
     }
 
-    private void runAnalysis(String inputFileName, String outputDir) {
+    private void runAnalysis(String inputFileName, String outputDir, int maxThreshold, int minThreshold) {
 
         // Setup the Spark context
         SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
@@ -48,15 +41,32 @@ public class RareItemSetMiner implements Serializable {
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map(this::itemSetFromLine);
         itemSetJavaRDD.collect().forEach(miner::addItemSet);
-        Set<ItemSet<String>> result = miner.mine(0, 10);
+        Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold);
 
         // Create a DStream that will connect to hostname:port, like localhost:9999
         // JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
 
+        // This is printing null right now because the mine is not implemented. But the tree is being printed so verify
+        // the other output.
         System.out.println("Result: " + result);
     }
 
+    /**
+     * Converts a string of the form "a b c d" into the ItemSet representing a transaction of a, b, c, and d.
+     * @param s The string to be converted to an item set
+     * @return The item set corresponding to the string
+     */
+    private ItemSet<String> itemSetFromLine(String s) {
+        String[] items = s.split(" ");
 
+        ItemSet<String> itemSet = new ItemSet<>(String.class);
+
+        for (String item : items) {
+            itemSet.add(new Item<>(item, String.class));
+        }
+
+        return itemSet;
+    }
 
     private static final FlatMapFunction<String, String> NEW_LINE_SPLIT = s -> Arrays.asList(s.split("\n"));
 
@@ -68,20 +78,8 @@ public class RareItemSetMiner implements Serializable {
 
         RareItemSetMiner rareItemSetMiner = new RareItemSetMiner();
 
-        rareItemSetMiner.runAnalysis(args[0], args[1]);
+        rareItemSetMiner.runAnalysis(args[0], args[1], 10, 0);
 
-    }
-
-    private ItemSet<String> itemSetFromLine(String s) {
-        String[] items = s.split(" ");
-
-        ItemSet<String> itemSet = new ItemSet<>(String.class);
-
-        for (String item : items) {
-            itemSet.add(new Item<>(item, String.class));
-        }
-
-        return itemSet;
     }
 
 }

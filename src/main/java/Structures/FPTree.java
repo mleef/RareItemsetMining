@@ -52,6 +52,7 @@ public class FPTree<Type> implements Serializable {
                 itemSetIterator.remove();
             }
 
+            //TODO Remove this once the mining is being done. Maybe add functionalyty to expose the tree through the interface?
             levelOrder();
         }
     }
@@ -153,6 +154,8 @@ public class FPTree<Type> implements Serializable {
 
     }
 
+
+    //TODO Move this to a separate test class
     public static void main(String[] args) {
 
         FPTree<Character> fp = new FPTree<Character>();

@@ -36,7 +36,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
     public Set<ItemSet<Type>> mine(int minThreshold, int maxThreshold) {
         this.tree.build();
 
-        // Do the mining
+        //TODO Do the mining
 
 
         return null;

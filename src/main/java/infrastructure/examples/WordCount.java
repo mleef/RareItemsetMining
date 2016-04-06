@@ -12,41 +12,48 @@ import scala.Tuple2;
 import java.util.Arrays;
 
 public class WordCount {
-  private static final FlatMapFunction<String, String> WORDS_EXTRACTOR =
-      new FlatMapFunction<String, String>() {
-        public Iterable<String> call(String s) throws Exception {
-          return Arrays.asList(s.split(" "));
-        }
-      };
+    /**
+     * NOTE: This example is taken directly from
+     * https://github.com/apache/spark/blob/master/examples/src/main/java/org/apache/spark/examples/JavaWordCount.java
+     *
+     * It is simply here as a test that we have Spark correctly setup.
+     */
 
-  private static final PairFunction<String, String, Integer> WORDS_MAPPER =
-      new PairFunction<String, String, Integer>() {
-        public Tuple2<String, Integer> call(String s) throws Exception {
-          return new Tuple2<String, Integer>(s, 1);
-        }
-      };
+    private static final FlatMapFunction<String, String> WORDS_EXTRACTOR =
+            new FlatMapFunction<String, String>() {
+                public Iterable<String> call(String s) throws Exception {
+                    return Arrays.asList(s.split(" "));
+                }
+            };
 
-  private static final Function2<Integer, Integer, Integer> WORDS_REDUCER =
-      new Function2<Integer, Integer, Integer>() {
-        public Integer call(Integer a, Integer b) throws Exception {
-          return a + b;
-        }
-      };
+    private static final PairFunction<String, String, Integer> WORDS_MAPPER =
+            new PairFunction<String, String, Integer>() {
+                public Tuple2<String, Integer> call(String s) throws Exception {
+                    return new Tuple2<String, Integer>(s, 1);
+                }
+            };
 
-  public static void main(String[] args) {
-    if (args.length < 1) {
-      System.err.println("Please provide the input file full path as argument");
-      System.exit(0);
+    private static final Function2<Integer, Integer, Integer> WORDS_REDUCER =
+            new Function2<Integer, Integer, Integer>() {
+                public Integer call(Integer a, Integer b) throws Exception {
+                    return a + b;
+                }
+            };
+
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Please provide the input file full path as argument");
+            System.exit(0);
+        }
+
+        SparkConf conf = new SparkConf().setAppName("org.sparkexample.WordCount").setMaster("local");
+        JavaSparkContext context = new JavaSparkContext(conf);
+
+        JavaRDD<String> file = context.textFile(args[0]);
+        JavaRDD<String> words = file.flatMap(WORDS_EXTRACTOR);
+        JavaPairRDD<String, Integer> pairs = words.mapToPair(WORDS_MAPPER);
+        JavaPairRDD<String, Integer> counter = pairs.reduceByKey(WORDS_REDUCER);
+
+        counter.saveAsTextFile(args[1] + "/WordCount");
     }
-
-    SparkConf conf = new SparkConf().setAppName("org.sparkexample.WordCount").setMaster("local");
-    JavaSparkContext context = new JavaSparkContext(conf);
-
-    JavaRDD<String> file = context.textFile(args[0]);
-    JavaRDD<String> words = file.flatMap(WORDS_EXTRACTOR);
-    JavaPairRDD<String, Integer> pairs = words.mapToPair(WORDS_MAPPER);
-    JavaPairRDD<String, Integer> counter = pairs.reduceByKey(WORDS_REDUCER);
-
-    counter.saveAsTextFile(args[1] + "/WordCount");
-  }
 }
