@@ -33,8 +33,6 @@ public class RareItemSetMiner implements Serializable {
         this.itemSetMiner = new FPItemSetMiner<>();
     }
 
-
-
     private void runAnalysis(String inputFileName, String outputDir) {
 
         // Setup the Spark context
