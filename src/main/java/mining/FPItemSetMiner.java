@@ -55,7 +55,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
         for(Item<Type> item : conditionalTree.items()) {
             if(conditionalTree.getSupport(item) > MIN_THRESHOLD) {
                 currentSuffix.push(item);
-                FPTree<Type> newTree = conditionalTree.buildConditional(item);
+                FPTree<Type> newTree = conditionalTree.buildConditional(item, MIN_THRESHOLD);
             }
 
         }

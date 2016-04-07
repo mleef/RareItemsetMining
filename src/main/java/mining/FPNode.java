@@ -9,8 +9,7 @@ import java.util.HashMap;
  */
 public class FPNode<Type> implements Serializable {
     public Item<Type> item; // Item stored in node
-    private FPNode<Type> parent; // Parent of node
-    public FPNode<Type> neighbor; // Next occurrence of Item in tree
+    public FPNode<Type> parent; // Parent of node
     public HashMap<Item<Type>, FPNode<Type>> children; // Children of node
     public int support; // Frequency of path occurrence
 

@@ -1,5 +1,7 @@
 package mining;
 
+import scala.Char;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +15,7 @@ public class FPTree<Type> implements Serializable {
     private FPNode<Type> root;
     private final List<ItemSet<Type>> itemSets;
     private final ConcurrentHashMap<Item<Type>, Integer> itemSupports; // To track item frequencies
-    private final ConcurrentHashMap<Item<Type>, FPNode<Type>> neighbors;
+    private final ConcurrentHashMap<Item<Type>, LinkedList<FPNode<Type>>> neighbors;
 
     /**
      * Constructor
@@ -32,7 +34,14 @@ public class FPTree<Type> implements Serializable {
         this.root = new FPNode<>(tree.root, null);
         this.itemSets = Collections.synchronizedList(tree.itemSets);
         this.itemSupports = new ConcurrentHashMap<>(tree.itemSupports);
-        this.neighbors = new ConcurrentHashMap<>(tree.neighbors);
+        this.neighbors = new ConcurrentHashMap<>();
+        // Update neighbor links
+        for(FPNode<Type> node : this.levelOrder()) {
+            if(node == root) {
+                continue;
+            }
+            this.updateNeighborLinks(node);
+        }
     }
 
     /**
@@ -51,7 +60,6 @@ public class FPTree<Type> implements Serializable {
      * Constructs FP tree by inserting each stored itemset into the tree
      */
     public void build() {
-        System.out.println("Building tree:  " + itemSets);
         synchronized (itemSets) {
             // Insert each item set into tree before removing
             Iterator<ItemSet<Type>> itemSetIterator = itemSets.iterator();
@@ -61,9 +69,6 @@ public class FPTree<Type> implements Serializable {
                 insert(itemSet.supportOrder());
                 itemSetIterator.remove();
             }
-
-            //TODO Remove this once the mining is being done. Maybe add functionalyty to expose the tree through the interface?
-            levelOrder();
         }
     }
 
@@ -71,10 +76,47 @@ public class FPTree<Type> implements Serializable {
      * Constructs conditional FP tree without given item
      * @param item Item to remove from tree.
      */
-    public FPTree<Type> buildConditional(Item<Type> item) {
-        System.out.println("Building tree:  " + itemSets);
+    public FPTree<Type> buildConditional(Item<Type> item, int minThreshold) {
         FPTree<Type> conditionalTree = new FPTree<>(this);
-        return null;
+
+        // Zero out supports of non-target item nodes
+        for(FPNode<Type> node : conditionalTree.levelOrder()) {
+            if(node == conditionalTree.root) {
+                continue;
+            }
+
+            if(!node.item.equals(item)) {
+                node.support = 0;
+            }
+        }
+
+        // Start from leaves, search upward and increment supports
+        for(FPNode<Type> leaf : conditionalTree.getNodesByItem(item)) {
+            int leafSupport = leaf.support;
+            FPNode<Type> current = leaf.parent;
+            while (current != conditionalTree.root) {
+                current.support += leafSupport;
+                current = current.parent;
+            }
+
+            // Remove leaf from parent's children
+            leaf.parent.children.remove(leaf.item);
+        }
+
+        // Remove nodes that have support below threshold
+        for(FPNode<Type> node : conditionalTree.levelOrder()) {
+            if(node == conditionalTree.root) {
+                continue;
+            }
+            if(node.support < minThreshold) {
+                node.parent.children.remove(node.item);
+            }
+        }
+
+        // Remove item for neighbor set
+        neighbors.remove(item);
+
+        return conditionalTree;
     }
 
     /**
@@ -104,34 +146,30 @@ public class FPTree<Type> implements Serializable {
      * @param item Contained item in nodes to match
      * @return List of nodes containing matching item
      */
-    private ArrayList<FPNode<Type>> getNodesByItem(Item<Type> item) {
-        ArrayList<FPNode<Type>> neighboringNodes = new ArrayList<>();
+    private LinkedList<FPNode<Type>> getNodesByItem(Item<Type> item) {
+        LinkedList<FPNode<Type>> neighboringNodes = new LinkedList<>();
         if(!neighbors.containsKey(item)) {
             return neighboringNodes;
         } else {
-            FPNode<Type> currentNeighbor = neighbors.get(item);
-            while(currentNeighbor != null) {
-                neighboringNodes.add(currentNeighbor);
-                currentNeighbor = currentNeighbor.neighbor;
-            }
+            return neighbors.get(item);
         }
-        return neighboringNodes;
-
     }
 
     /**
      * Prints the tree in level order
      */
-    private void levelOrder() {
+    private LinkedList<FPNode<Type>> levelOrder() {
         LinkedList<FPNode<Type>> queue = new LinkedList<>();
+        LinkedList<FPNode<Type>> result = new LinkedList<>();
         queue.add(root);
         while(!queue.isEmpty()) {
             FPNode<Type> cur = queue.poll();
-            System.out.println(cur);
+            result.add(cur);
             for(FPNode<Type> child : cur.children.values()) {
                 queue.add(child);
             }
         }
+        return result;
     }
 
     /**
@@ -163,15 +201,12 @@ public class FPTree<Type> implements Serializable {
      */
     private void updateNeighborLinks(FPNode<Type> node) {
         if(!neighbors.containsKey(node.item)) {
-            neighbors.put(node.item, node);
+            LinkedList<FPNode<Type>> newNeighbors = new LinkedList<>();
+            newNeighbors.add(node);
+            neighbors.put(node.item, newNeighbors);
         } else {
-            FPNode<Type> cur = neighbors.get(node.item);
-            while(cur.neighbor != null) {
-                cur = cur.neighbor;
-            }
-            cur.neighbor = node;
+            neighbors.get(node.item).add(node);
         }
-
     }
 
     /**
@@ -255,15 +290,21 @@ public class FPTree<Type> implements Serializable {
         fp.addItemSet(is5);
         fp.addItemSet(is6);
 
+
         fp.build();
 
-        FPTree<Character> condTree = new FPTree<>(fp);
+        for(FPNode<Character> node : fp.levelOrder()) {
+            System.out.println(node);
+        }
+        System.out.println();
+        FPTree<Character> condTree = fp.buildConditional(gen.newItem('D'), 1);
 
-        fp.addItemSet(is7);
-        fp.insert(is7.supportOrder());
+        for(FPNode<Character> node : condTree.levelOrder()) {
+            System.out.println(node);
+        }
 
-        fp.levelOrder();
-        condTree.levelOrder();
+
+
         /*
         // Randomly generate 1000 item sets and populate the tree
         Random r = new Random();
