@@ -28,7 +28,7 @@ public class RareItemSetMiner implements Serializable {
 
     private void runAnalysis(String inputFileName, String outputDir, int maxThreshold, int minThreshold) {
 
-        // Setup the Spark context
+        // Setup the Spark contextBe
         SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
         //JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
         JavaSparkContext context = new JavaSparkContext(conf);

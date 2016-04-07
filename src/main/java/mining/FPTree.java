@@ -19,14 +19,24 @@ public class FPTree<Type> implements Serializable {
      * Constructor
      */
     public FPTree() {
-        this.root = new FPNode<>(null, null);
+        this.root = new FPNode<>(null, null, 0);
         this.itemSets = Collections.synchronizedList(new ArrayList<>());
         this.itemSupports = new ConcurrentHashMap<>();
         this.neighbors = new ConcurrentHashMap<>();
     }
 
     /**
-     * Adds new item set for tree construction
+     * Copy constructor
+     */
+    public FPTree(FPTree<Type> tree) {
+        this.root = new FPNode<>(tree.root, null);
+        this.itemSets = Collections.synchronizedList(tree.itemSets);
+        this.itemSupports = new ConcurrentHashMap<>(tree.itemSupports);
+        this.neighbors = new ConcurrentHashMap<>(tree.neighbors);
+    }
+
+    /**
+     * Adds new item set for tree construction and updates global support counts
      * @param itemSet ItemSet to add to tree
      */
     public void addItemSet(ItemSet<Type> itemSet) {
@@ -58,6 +68,16 @@ public class FPTree<Type> implements Serializable {
     }
 
     /**
+     * Constructs conditional FP tree without given item
+     * @param item Item to remove from tree.
+     */
+    public FPTree<Type> buildConditional(Item<Type> item) {
+        System.out.println("Building tree:  " + itemSets);
+        FPTree<Type> conditionalTree = new FPTree<>(this);
+        return null;
+    }
+
+    /**
      * Inserts item sets into the tree
      * @param itemSet ItemSet to be inserted
      */
@@ -70,7 +90,7 @@ public class FPTree<Type> implements Serializable {
                 current = current.children.get(item);
             } else {
                 // Create new node with associated item and update neighboring links
-                FPNode<Type> newNode = new FPNode<>(item, current);
+                FPNode<Type> newNode = new FPNode<>(item, current, 1);
                 current.children.put(item, newNode);
                 updateNeighborLinks(newNode);
                 current = newNode;
@@ -154,6 +174,30 @@ public class FPTree<Type> implements Serializable {
 
     }
 
+    /**
+     * Gets the unique items used to build the tree
+     * @return All items in the tree
+     */
+    public ArrayList<Item<Type>> items() {
+        return new ArrayList<>(itemSupports.keySet());
+    }
+
+    /**
+     * Gets the support of given item
+     * @param item to get support of
+     * @return Support of item
+     */
+    public int getSupport(Item<Type> item) {
+        return itemSupports.get(item);
+    }
+
+    /**
+     * Gets the unique item sets used to build the tree
+     * @return All item sets in the tree
+     */
+    public ArrayList<ItemSet<Type>> itemSets() {
+        return new ArrayList<>(itemSets);
+    }
 
     //TODO Move this to a separate test class
     public static void main(String[] args) {
@@ -168,6 +212,7 @@ public class FPTree<Type> implements Serializable {
         ItemSet<Character> is4 = gen.newItemSet();
         ItemSet<Character> is5 = gen.newItemSet();
         ItemSet<Character> is6 = gen.newItemSet();
+        ItemSet<Character> is7 = gen.newItemSet();
 
         is1.add(gen.newItem('A'));
         is1.add(gen.newItem('B'));
@@ -198,6 +243,10 @@ public class FPTree<Type> implements Serializable {
         is6.add(gen.newItem('C'));
         is6.add(gen.newItem('D'));
 
+        is7.add(gen.newItem('A'));
+        is7.add(gen.newItem('B'));
+        is7.add(gen.newItem('F'));
+
 
         fp.addItemSet(is1);
         fp.addItemSet(is2);
@@ -207,8 +256,14 @@ public class FPTree<Type> implements Serializable {
         fp.addItemSet(is6);
 
         fp.build();
-        fp.levelOrder();
 
+        FPTree<Character> condTree = new FPTree<>(fp);
+
+        fp.addItemSet(is7);
+        fp.insert(is7.supportOrder());
+
+        fp.levelOrder();
+        condTree.levelOrder();
         /*
         // Randomly generate 1000 item sets and populate the tree
         Random r = new Random();
