@@ -32,14 +32,15 @@ public class FPTree<Type> implements Serializable {
      */
     public FPTree(FPTree<Type> tree) {
         this.root = new FPNode<>(tree.root, null);
-        this.itemSets = Collections.synchronizedList(tree.itemSets);
-        this.itemSupports = new ConcurrentHashMap<>(tree.itemSupports);
+        this.itemSets = Collections.synchronizedList(new ArrayList<>());
+        this.itemSupports = new ConcurrentHashMap<>();
         this.neighbors = new ConcurrentHashMap<>();
-        // Update neighbor links
+        // Update neighbor links and item frequencies
         for(FPNode<Type> node : this.levelOrder()) {
             if(node == root) {
                 continue;
             }
+            this.updateGlobalSupports(node.item);
             this.updateNeighborLinks(node);
         }
     }
@@ -94,7 +95,7 @@ public class FPTree<Type> implements Serializable {
         for(FPNode<Type> leaf : conditionalTree.getNodesByItem(item)) {
             int leafSupport = leaf.support;
             FPNode<Type> current = leaf.parent;
-            while (current != conditionalTree.root) {
+            while (current != null) {
                 current.support += leafSupport;
                 current = current.parent;
             }
@@ -186,6 +187,18 @@ public class FPTree<Type> implements Serializable {
     }
 
     /**
+     * Updates tree wide item supports
+     * @param item Item to update counts of
+     */
+    private void updateGlobalSupports(Item<Type> item) {
+        if(!itemSupports.containsKey(item)) {
+            itemSupports.put(item, 0);
+        }
+        itemSupports.put(item, itemSupports.get(item) + 1);
+
+    }
+
+    /**
      * Updates support of item objects to reflect global counts
      * @param itemSet ItemSet of items to be modified
      */
@@ -226,6 +239,27 @@ public class FPTree<Type> implements Serializable {
         return itemSupports.get(item);
     }
 
+    /**
+     * Gets the support of given itemf
+     * @return Whether or not the tree has one path
+     */
+    public boolean hasSinglePath() {
+        FPNode<Type> current = root;
+        while(current != null) {
+            if(current.children.size() > 1) {
+                return false;
+            } else if(current.children.size() == 0) {
+                return true;
+            } else {
+                // Runs one time
+                for(FPNode<Type> node : current.children.values()) {
+                    current = node;
+                }
+            }
+        }
+
+        throw new NullPointerException("Root of tree is null");
+    }
     /**
      * Gets the unique item sets used to build the tree
      * @return All item sets in the tree
@@ -297,7 +331,7 @@ public class FPTree<Type> implements Serializable {
             System.out.println(node);
         }
         System.out.println();
-        FPTree<Character> condTree = fp.buildConditional(gen.newItem('D'), 1);
+        FPTree<Character> condTree = fp.buildConditional(gen.newItem('D'), 2);
 
         for(FPNode<Character> node : condTree.levelOrder()) {
             System.out.println(node);

@@ -52,10 +52,26 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
     private void mine(Stack<Item<Type>> currentSuffix,
                       FPTree<Type> conditionalTree,  Set<ItemSet<Type>> resultItemSets) {
 
+        // Base case
+        if(conditionalTree.hasSinglePath()) {
+            ArrayList<Item<Type>> items = conditionalTree.items();
+            ArrayList<ItemSet<Type>> allSubsets = new ArrayList<>();
+            //allSubsets.add(currentSuffix);
+            for (Item<Type> item : items) {
+                for (ItemSet<Type> subset : allSubsets) {
+                    //allSubsets.add(subset + item);
+                }
+            }
+            //allsubsets.remove(0); // remove just the suffix
+        }
+
+
+        // Generate condition trees using each item as a suffix
         for(Item<Type> item : conditionalTree.items()) {
             if(conditionalTree.getSupport(item) > MIN_THRESHOLD) {
                 currentSuffix.push(item);
                 FPTree<Type> newTree = conditionalTree.buildConditional(item, MIN_THRESHOLD);
+                mine(currentSuffix, newTree, resultItemSets);
             }
 
         }
