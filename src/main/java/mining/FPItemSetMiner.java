@@ -1,10 +1,7 @@
 package mining;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by marcleef on 4/5/16.
@@ -16,12 +13,14 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
     private int MAX_THRESHOLD;
 
     private FPTree<Type> tree;
+    private ItemGenerator<Type> generator;
 
     /**
      * Constructor
      */
-    public FPItemSetMiner() {
+    public FPItemSetMiner(Class<Type> type) {
         this.tree = new FPTree<>();
+        this.generator = new ItemGenerator<>(type);
     }
 
     /**
@@ -29,7 +28,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
      * @param itemSet ItemSet to add to tree
      */
     public void addItemSet(ItemSet<Type> itemSet) {
-        System.out.println("Adding: " + itemSet);
+        //System.out.println("Adding: " + itemSet);
         this.tree.addItemSet(itemSet);
     }
 
@@ -44,38 +43,98 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
 
         Set<ItemSet<Type>> result = new HashSet<>();
         // populate result with item sets within bounds
-        mine(new Stack<>(), this.tree, new HashSet<>());
+        mine(new ArrayList<>(), this.tree, result);
+
         return result;
 
     }
 
-    private void mine(Stack<Item<Type>> currentSuffix,
+    private void mine(ArrayList<Item<Type>> currentSuffix,
                       FPTree<Type> conditionalTree,  Set<ItemSet<Type>> resultItemSets) {
 
         // Base case
         if(conditionalTree.hasSinglePath()) {
-            ArrayList<Item<Type>> items = conditionalTree.items();
-            ArrayList<ItemSet<Type>> allSubsets = new ArrayList<>();
-            //allSubsets.add(currentSuffix);
-            for (Item<Type> item : items) {
-                for (ItemSet<Type> subset : allSubsets) {
-                    //allSubsets.add(subset + item);
-                }
+            ArrayList<Item<Type>> newSuffix = new ArrayList<>(currentSuffix);
+            for(Item<Type> item : conditionalTree.items()) {
+                newSuffix.add(item);
+                resultItemSets.add(generator.newItemSet(newSuffix));
+                newSuffix.remove(item);
             }
-            //allsubsets.remove(0); // remove just the suffix
-        }
+            newSuffix.addAll(conditionalTree.items());
+            resultItemSets.add(generator.newItemSet(newSuffix));
 
+            return;
+        }
 
         // Generate condition trees using each item as a suffix
         for(Item<Type> item : conditionalTree.items()) {
             if(conditionalTree.getSupport(item) > MIN_THRESHOLD) {
-                currentSuffix.push(item);
+                ArrayList<Item<Type>> newSuffix = new ArrayList<>(currentSuffix);
+                newSuffix.add(item);
                 FPTree<Type> newTree = conditionalTree.buildConditional(item, MIN_THRESHOLD);
-                mine(currentSuffix, newTree, resultItemSets);
+                mine(newSuffix, newTree, resultItemSets);
             }
 
         }
 
+
+    }
+
+    public static void main(String[] args) {
+        FPTree<Character> fp = new FPTree<>();
+        ItemGenerator<Character> gen = new ItemGenerator<>(Character.class);
+
+        // Testing sample tree from https://en.wikibooks.org/wiki/Data_Mining_Algorithms_In_R/Frequent_Pattern_Mining/The_FP-Growth_Algorithm#cite_note-CorneliaRobert-5
+        ItemSet<Character> is1 = gen.newItemSet();
+        ItemSet<Character> is2 = gen.newItemSet();
+        ItemSet<Character> is3 = gen.newItemSet();
+        ItemSet<Character> is4 = gen.newItemSet();
+        ItemSet<Character> is5 = gen.newItemSet();
+        ItemSet<Character> is6 = gen.newItemSet();
+        ItemSet<Character> is7 = gen.newItemSet();
+
+        is1.add(gen.newItem('A'));
+        is1.add(gen.newItem('B'));
+        is1.add(gen.newItem('D'));
+        is1.add(gen.newItem('E'));
+
+        is2.add(gen.newItem('B'));
+        is2.add(gen.newItem('C'));
+        is2.add(gen.newItem('E'));
+
+        is3.add(gen.newItem('A'));
+        is3.add(gen.newItem('B'));
+        is3.add(gen.newItem('D'));
+        is3.add(gen.newItem('E'));
+
+        is4.add(gen.newItem('A'));
+        is4.add(gen.newItem('B'));
+        is4.add(gen.newItem('C'));
+        is4.add(gen.newItem('E'));
+
+        is5.add(gen.newItem('A'));
+        is5.add(gen.newItem('B'));
+        is5.add(gen.newItem('C'));
+        is5.add(gen.newItem('D'));
+        is5.add(gen.newItem('E'));
+
+        is6.add(gen.newItem('B'));
+        is6.add(gen.newItem('C'));
+        is6.add(gen.newItem('D'));
+
+        FPItemSetMiner<Character> miner = new FPItemSetMiner<>(Character.class);
+
+        miner.addItemSet(is1);
+        miner.addItemSet(is2);
+        miner.addItemSet(is3);
+        miner.addItemSet(is4);
+        miner.addItemSet(is5);
+        miner.addItemSet(is6);
+
+
+        for(ItemSet<Character> pattern : miner.mine(3, 10)) {
+            System.out.println(pattern);
+        }
 
     }
 }

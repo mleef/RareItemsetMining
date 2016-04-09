@@ -23,7 +23,7 @@ public class RareItemSetMiner implements Serializable {
     ItemSetMiner<String> itemSetMiner;
 
     public RareItemSetMiner() {
-        this.itemSetMiner = new FPItemSetMiner<>();
+        this.itemSetMiner = new FPItemSetMiner<>(String.class);
     }
 
     private void runAnalysis(String inputFileName, String outputDir, int maxThreshold, int minThreshold) {
@@ -34,7 +34,7 @@ public class RareItemSetMiner implements Serializable {
         JavaSparkContext context = new JavaSparkContext(conf);
 
         // Setup the miner
-        FPItemSetMiner<String> miner = new FPItemSetMiner<>();
+        FPItemSetMiner<String> miner = new FPItemSetMiner<>(String.class);
 
         // Perform the mappings
         JavaRDD<String> file = context.textFile(inputFileName);

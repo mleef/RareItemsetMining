@@ -46,6 +46,21 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
         return sortedItems;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("ItemSet{support=");
+        sb.append(this.support);
+        sb.append(",items=");
+        for(Item<Type> item : this) {
+            sb.append(item.toString());
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("}");
+        return sb.toString();
+    }
+
     /**
      * Set item set support
      * @param support Frequency of item set

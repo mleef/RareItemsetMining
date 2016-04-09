@@ -40,7 +40,7 @@ public class FPTree<Type> implements Serializable {
             if(node == root) {
                 continue;
             }
-            this.updateGlobalSupports(node.item);
+            //this.updateGlobalSupports(node.item);
             this.updateNeighborLinks(node);
         }
     }
@@ -111,6 +111,8 @@ public class FPTree<Type> implements Serializable {
             }
             if(node.support < minThreshold) {
                 node.parent.children.remove(node.item);
+            } else {
+                conditionalTree.itemSupports.put(node.item, node.support);
             }
         }
 
@@ -157,9 +159,10 @@ public class FPTree<Type> implements Serializable {
     }
 
     /**
-     * Prints the tree in level order
+     * Collects nodes of the tree in level order
+     * @return Linked list result of traversal
      */
-    private LinkedList<FPNode<Type>> levelOrder() {
+    public LinkedList<FPNode<Type>> levelOrder() {
         LinkedList<FPNode<Type>> queue = new LinkedList<>();
         LinkedList<FPNode<Type>> result = new LinkedList<>();
         queue.add(root);
@@ -331,11 +334,17 @@ public class FPTree<Type> implements Serializable {
             System.out.println(node);
         }
         System.out.println();
-        FPTree<Character> condTree = fp.buildConditional(gen.newItem('D'), 2);
+        FPTree<Character> condTree = fp.buildConditional(gen.newItem('A'), 3);
 
         for(FPNode<Character> node : condTree.levelOrder()) {
             System.out.println(node);
         }
+
+        for(Item<Character> item : condTree.items()) {
+            System.out.println(item);
+        }
+
+        System.out.println(condTree.hasSinglePath());
 
 
 

@@ -46,6 +46,23 @@ public class ItemGenerator<Type> {
     }
 
     /**
+     * Generates new item set from iterable of items and sets support value to that of lowest item
+     * @return New item set of the same type as the generator
+     */
+    public ItemSet<Type> newItemSet(Iterable<Item<Type>> items) {
+        int lowSupport = Integer.MAX_VALUE;
+        ItemSet<Type> itemSet = new ItemSet<>(type);
+        for(Item<Type> item : items) {
+            itemSet.add(item);
+            if(item.support < lowSupport) {
+                lowSupport = item.support;
+            }
+        }
+        itemSet.setSupport(lowSupport);
+        return itemSet;
+    }
+
+    /**
      * Validates that value matches type of generator
      * @param value Type to validate
      */

@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 public class Item<Type> implements Comparable<Item<Type>>, Serializable {
     private Type value; // Item type
-    private int support; // Item frequency
+    public int support; // Item frequency
     private final Class<Type> type; // Class of type
 
     /**
