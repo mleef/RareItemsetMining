@@ -87,6 +87,31 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
     }
 
     /**
+     * Sets the support of this itemset to be the minimum of the
+     * supports of all nodes in the path in which this itemset's items appear.
+     * ASSUMPTION: FPTree 'path' is a path. Too slow to check though.
+     * @param path An unbranching FP-tree from which we will read supports
+     */
+    public void setSupportFromPath(FPTree<Type> path) {
+        int minSupport = Integer.MAX_VALUE;
+        for (Item<Type> item : this) {
+            // getSupport works because each item appears only once in the
+            // tree, so the tree's global support for that item is also
+            // the node's supports
+
+
+            if (path.contains(item)) {
+                int curSupport = path.getSupport(item);
+                if (curSupport < minSupport)
+                    minSupport = curSupport;
+            }
+        }
+        if (minSupport == Integer.MAX_VALUE)
+            minSupport = 0;
+        this.setSupport(minSupport);
+    }
+
+    /**
      * Gets the item type
      * @return Type of item set
      */

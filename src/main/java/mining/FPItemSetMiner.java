@@ -58,6 +58,15 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
 
         // In the base case of a single path, we generate all subsets of the items along that path
         if(conditionalTree.hasSinglePath()) {
+            /*
+            System.out.println("Conditional tree is path with " + conditionalTree.items().size() + " nodes");
+            System.out.println("Suffix at this point is " + currentSuffix.toString());
+            System.out.print("Level-wise: ");
+            for (FPNode<Type> node : conditionalTree.levelOrder() ) {
+                System.out.print(node.toString());
+            }
+            System.out.println();
+            */
             ArrayList<ItemSet<Type>> allItemSetsInPath = new ArrayList<>();
 
             /* this one weird trick, invented by a mom, for generating all subsets */
@@ -73,32 +82,26 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
                 allItemSetsInPath.addAll(newSetsThisIter);
             }
             allItemSetsInPath.remove(baseSet);
+            //System.out.println(allItemSetsInPath.size());
+            for (ItemSet<Type> itemset : allItemSetsInPath)
+                itemset.setSupportFromPath(conditionalTree);
             resultItemSets.addAll(allItemSetsInPath);
             return;
         }
 
-    /*
-            ArrayList<Item<Type>> newSuffix = new ArrayList<>(currentSuffix);
-            for(Item<Type> item : conditionalTree.items()) {
-                newSuffix.add(item);
-                resultItemSets.add(generator.newItemSet(newSuffix));
-                newSuffix.remove(item);
-            }
-            newSuffix.addAll(conditionalTree.items());
-            resultItemSets.add(generator.newItemSet(newSuffix));
+        // A A A AB B
+        // A 4/5
+        // B 2/5
 
-
-            return;
-        }
-        */
+        // AB 1/5
 
         // Generate condition trees using each item as a suffix
         for(Item<Type> item : conditionalTree.items()) {
             if(conditionalTree.getSupport(item) > MIN_THRESHOLD) {
-                ArrayList<Item<Type>> newSuffix = new ArrayList<>(currentSuffix);
-                newSuffix.add(item);
+                currentSuffix.add(item);
                 FPTree<Type> newTree = conditionalTree.buildConditional(item, MIN_THRESHOLD);
-                mine(newSuffix, newTree, resultItemSets);
+                mine(currentSuffix, newTree, resultItemSets);
+                currentSuffix.remove(currentSuffix.size() - 1);
             }
 
         }
