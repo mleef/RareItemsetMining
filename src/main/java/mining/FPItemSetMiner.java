@@ -52,8 +52,32 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
     private void mine(ArrayList<Item<Type>> currentSuffix,
                       FPTree<Type> conditionalTree,  Set<ItemSet<Type>> resultItemSets) {
 
-        // Base case
+        // if the current conditional tree IS a conditional tree, add the set which it is conditional upon
+        if (!currentSuffix.isEmpty())
+            resultItemSets.add(generator.newItemSet(currentSuffix));
+
+        // In the base case of a single path, we generate all subsets of the items along that path
         if(conditionalTree.hasSinglePath()) {
+            ArrayList<ItemSet<Type>> allItemSetsInPath = new ArrayList<>();
+
+            /* this one weird trick, invented by a mom, for generating all subsets */
+            ItemSet<Type> baseSet = generator.newItemSet(currentSuffix);
+            allItemSetsInPath.add(baseSet);
+            for (Item<Type> item : conditionalTree.items()) {
+                ArrayList<ItemSet<Type>> newSetsThisIter = new ArrayList<>();
+                for (ItemSet<Type> itemset : allItemSetsInPath) {
+                    ItemSet<Type> newSet = new ItemSet<>(itemset);
+                    newSet.add(item);
+                    newSetsThisIter.add(newSet);
+                }
+                allItemSetsInPath.addAll(newSetsThisIter);
+            }
+            allItemSetsInPath.remove(baseSet);
+            resultItemSets.addAll(allItemSetsInPath);
+            return;
+        }
+
+    /*
             ArrayList<Item<Type>> newSuffix = new ArrayList<>(currentSuffix);
             for(Item<Type> item : conditionalTree.items()) {
                 newSuffix.add(item);
@@ -63,8 +87,10 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
             newSuffix.addAll(conditionalTree.items());
             resultItemSets.add(generator.newItemSet(newSuffix));
 
+
             return;
         }
+        */
 
         // Generate condition trees using each item as a suffix
         for(Item<Type> item : conditionalTree.items()) {
@@ -131,7 +157,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
         miner.addItemSet(is5);
         miner.addItemSet(is6);
 
-
+        System.out.println("Patterns found:");
         for(ItemSet<Character> pattern : miner.mine(3, 10)) {
             System.out.println(pattern);
         }

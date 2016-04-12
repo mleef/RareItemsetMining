@@ -1,12 +1,13 @@
 package mining;
 
 import com.sun.corba.se.impl.io.TypeMismatchException;
+import java.io.Serializable;
 
 /**
  * Created by marcleef on 3/29/16.
  * Helps in simplifying item creation.
  */
-public class ItemGenerator<Type> {
+public class ItemGenerator<Type> implements Serializable{
     private final Class<Type> type;
 
     /**

@@ -24,16 +24,33 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
         this.support = 0;
     }
 
+    /**
+     * Constructor
+     * @param that An item set to duplicate
+     */
+    public ItemSet(ItemSet<Type> that) {
+        this.type = that.type;
+        this.support = that.support;
+        for (Item<Type> item : that)
+            this.add(item);
+    }
+
     @Override
     /**
      * @param item Item to insert into item set
-     * @return True if succesful addition, false otherwise
+     * @return True if successful addition, false otherwise
      */
     public boolean add(Item<Type> item) {
         if(this.getType() != item.getType()) {
             throw new TypeMismatchException(String.format("Cannot add Item<%s> to ItemSet<%s>", item.getType(), this.getType()));
         }
-        return super.add(item);
+        boolean retVal = super.add(item);
+        if (retVal) {
+            if (item.support < this.support)
+                this.support = item.support;
+            return true;
+        }
+        return false;
     }
 
     /**
