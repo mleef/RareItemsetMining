@@ -82,17 +82,14 @@ public class FPTree<Type> implements Serializable {
 
         // Zero out supports of non-target item nodes
         for(FPNode<Type> node : conditionalTree.levelOrder()) {
-            if(node == conditionalTree.root) {
+            if(node == conditionalTree.root)
                 continue;
-            }
 
             if(!node.item.equals(item)) {
                 node.support = 0;
                 conditionalTree.itemSupports.put(node.item, 0);
             }
         }
-
-        //System.out.println("itemSupports after zeroing: " + conditionalTree.itemSupports);
 
         // Start from leaves, search upward and increment supports
         for(FPNode<Type> leaf : conditionalTree.getNodesByItem(item)) {
@@ -108,8 +105,6 @@ public class FPTree<Type> implements Serializable {
         }
 
 
-        //System.out.println("itemSupports after upward search: " + conditionalTree.itemSupports);
-
         // obliterate the conditional item from the tree
         conditionalTree.itemSupports.remove(item);
         conditionalTree.neighbors.remove(item);
@@ -119,7 +114,7 @@ public class FPTree<Type> implements Serializable {
             if(node == conditionalTree.root)
                 continue;
 
-            // if this node corresponds to the conditional item, sever parent link
+            // if this node corresponds to the target item, sever parent link
             if (node.item.equals(item))
                 node.parent.children.remove(node.item);
 
@@ -137,8 +132,6 @@ public class FPTree<Type> implements Serializable {
                 }
             }
         }
-
-        //System.out.println("itemSupports after pruning: " + conditionalTree.itemSupports);
 
         return conditionalTree;
     }

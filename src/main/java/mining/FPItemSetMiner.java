@@ -45,7 +45,14 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
         // populate result with item sets within bounds
         mine(new ArrayList<>(), this.tree, result);
 
-        return result;
+        Set<ItemSet<Type>> prunedResult = new HashSet<>();
+
+        for(ItemSet<Type> itemset : result) {
+            if (itemset.getSupport() <= MAX_THRESHOLD)
+                prunedResult.add(itemset);
+        }
+
+        return prunedResult;
 
     }
 
@@ -58,15 +65,6 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
 
         // In the base case of a single path, we generate all subsets of the items along that path
         if(conditionalTree.hasSinglePath()) {
-            /*
-            System.out.println("Conditional tree is path with " + conditionalTree.items().size() + " nodes");
-            System.out.println("Suffix at this point is " + currentSuffix.toString());
-            System.out.print("Level-wise: ");
-            for (FPNode<Type> node : conditionalTree.levelOrder() ) {
-                System.out.print(node.toString());
-            }
-            System.out.println();
-            */
             ArrayList<ItemSet<Type>> allItemSetsInPath = new ArrayList<>();
 
             /* this one weird trick, invented by a mom, for generating all subsets */
@@ -81,19 +79,13 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
                 }
                 allItemSetsInPath.addAll(newSetsThisIter);
             }
-            allItemSetsInPath.remove(baseSet);
-            //System.out.println(allItemSetsInPath.size());
+            allItemSetsInPath.remove(baseSet); // baseSet was only included for suffixing the generated sets
+
             for (ItemSet<Type> itemset : allItemSetsInPath)
                 itemset.setSupportFromPath(conditionalTree);
             resultItemSets.addAll(allItemSetsInPath);
             return;
         }
-
-        // A A A AB B
-        // A 4/5
-        // B 2/5
-
-        // AB 1/5
 
         // Generate condition trees using each item as a suffix
         for(Item<Type> item : conditionalTree.items()) {
