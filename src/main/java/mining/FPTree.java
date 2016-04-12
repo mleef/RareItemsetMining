@@ -33,7 +33,7 @@ public class FPTree<Type> implements Serializable {
     public FPTree(FPTree<Type> tree) {
         this.root = new FPNode<>(tree.root, null);
         this.itemSets = Collections.synchronizedList(new ArrayList<>());
-        this.itemSupports = new ConcurrentHashMap<>();
+        this.itemSupports = new ConcurrentHashMap<>(tree.itemSupports);
         this.neighbors = new ConcurrentHashMap<>();
         // Update neighbor links and item frequencies
         for(FPNode<Type> node : this.levelOrder()) {
@@ -88,8 +88,11 @@ public class FPTree<Type> implements Serializable {
 
             if(!node.item.equals(item)) {
                 node.support = 0;
+                conditionalTree.itemSupports.put(node.item, 0);
             }
         }
+
+        //System.out.println("itemSupports after zeroing: " + conditionalTree.itemSupports);
 
         // Start from leaves, search upward and increment supports
         for(FPNode<Type> leaf : conditionalTree.getNodesByItem(item)) {
@@ -97,27 +100,45 @@ public class FPTree<Type> implements Serializable {
             FPNode<Type> current = leaf.parent;
             while (current != null) {
                 current.support += leafSupport;
+                if (current.item != null) // if the node isn't the root, update item support
+                    conditionalTree.itemSupports.put(current.item,
+                            conditionalTree.itemSupports.get(current.item) + leafSupport);
                 current = current.parent;
             }
-
-            // Remove leaf from parent's children
-            leaf.parent.children.remove(leaf.item);
         }
 
-        // Remove nodes that have support below threshold
+
+        //System.out.println("itemSupports after upward search: " + conditionalTree.itemSupports);
+
+        // obliterate the conditional item from the tree
+        conditionalTree.itemSupports.remove(item);
+        conditionalTree.neighbors.remove(item);
+
+        // Remove the nodes that have support below threshold
         for(FPNode<Type> node : conditionalTree.levelOrder()) {
-            if(node == conditionalTree.root) {
+            if(node == conditionalTree.root)
                 continue;
-            }
-            if(node.support < minThreshold) {
+
+            // if this node corresponds to the conditional item, sever parent link
+            if (node.item.equals(item))
                 node.parent.children.remove(node.item);
-            } else {
-                conditionalTree.itemSupports.put(node.item, node.support);
+
+            else if(node.support < minThreshold) {
+                node.parent.children.remove(node.item);
+                if (conditionalTree.itemSupports.containsKey(node.item)) {
+                    int support = conditionalTree.itemSupports.get(node.item);
+                    support -= node.support;
+                    if (support == 0)
+                        conditionalTree.itemSupports.remove(node.item);
+                    else if (support < 0)
+                        throw new RuntimeException("WHY IS THIS SUPPORT WRONG: " + node.toString());
+                    else
+                        conditionalTree.itemSupports.put(node.item, support);
+                }
             }
         }
 
-        // Remove item for neighbor set
-        neighbors.remove(item);
+        //System.out.println("itemSupports after pruning: " + conditionalTree.itemSupports);
 
         return conditionalTree;
     }
@@ -240,6 +261,15 @@ public class FPTree<Type> implements Serializable {
      */
     public int getSupport(Item<Type> item) {
         return itemSupports.get(item);
+    }
+
+    /**
+     * Does this tree contain the given item in any nodes?
+     * @param item The item that we want to know is contained by the tree
+     * @return true if the item is in the tree, false otherwise
+     */
+    public boolean contains(Item<Type> item) {
+        return itemSupports.containsKey(item);
     }
 
     /**
