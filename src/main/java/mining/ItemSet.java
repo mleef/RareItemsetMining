@@ -87,6 +87,14 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
     }
 
     /**
+     * Get item set support
+     * @return Item set support
+     */
+    public int getSupport() {
+        return support;
+    }
+
+    /**
      * Sets the support of this itemset to be the minimum of the
      * supports of all nodes in the path in which this itemset's items appear.
      * ASSUMPTION: FPTree 'path' is a path. Too slow to check though.
