@@ -7,3 +7,5 @@ res/*
 
 # Ignore the compiled classes
 target/*
+data/2013-02-27.csv
+data/2013-02-27.gz
