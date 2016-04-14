@@ -119,7 +119,9 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
     public static void main(String[] args) {
         FPTree<Character> fp = new FPTree<>();
         ItemGenerator<Character> gen = new ItemGenerator<>(Character.class);
+        FPItemSetMiner<Character> miner = new FPItemSetMiner<>(Character.class);
 
+        /*
         // Testing sample tree from https://en.wikibooks.org/wiki/Data_Mining_Algorithms_In_R/Frequent_Pattern_Mining/The_FP-Growth_Algorithm#cite_note-CorneliaRobert-5
         ItemSet<Character> is1 = gen.newItemSet();
         ItemSet<Character> is2 = gen.newItemSet();
@@ -158,7 +160,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
         is6.add(gen.newItem('C'));
         is6.add(gen.newItem('D'));
 
-        FPItemSetMiner<Character> miner = new FPItemSetMiner<>(Character.class);
+
 
         miner.addItemSet(is1);
         miner.addItemSet(is2);
@@ -169,6 +171,20 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
 
         System.out.println("Patterns found:");
         for(ItemSet<Character> pattern : miner.mine(3, 10, 1, 2)) {
+            System.out.println(pattern);
+        }
+        */
+
+        Random r = new Random();
+        for(int i = 0; i < 100000; i++) {
+            ItemSet<Character> itemSet = gen.newItemSet();
+            for(int j = 0; j < r.nextInt(10); j++) {
+                itemSet.add(gen.newItem((char)(r.nextInt(26) + 'a')));
+            }
+            miner.addItemSet(itemSet);
+        }
+
+        for(ItemSet<Character> pattern : miner.mine(1, 10, 2, 10)) {
             System.out.println(pattern);
         }
 

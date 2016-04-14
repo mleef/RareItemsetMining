@@ -53,7 +53,9 @@ public class RareItemSetMiner implements Serializable {
 
         // This is printing null right now because the mine is not implemented. But the tree is being printed so verify
         // the other output.
-        System.out.println("Result: " + result);
+        for(ItemSet<String> items : result) {
+            System.out.println(items);
+        }
     }
 
     private void runGroceries(int minThreshold, int maxThreshold, int minSize, int maxSize) {
@@ -77,7 +79,9 @@ public class RareItemSetMiner implements Serializable {
 
         // This is printing null right now because the mine is not implemented. But the tree is being printed so verify
         // the other output.
-        System.out.println("Result: " + result);
+        for(ItemSet<String> items : result) {
+            System.out.println(items);
+        }
     }
 
     private void runAnalysisSocket(int minThreshold, int maxThreshold, int minSize, int maxSize) {
@@ -109,7 +113,7 @@ public class RareItemSetMiner implements Serializable {
     /**
      * Converts a string of the form "a b c d" into the ItemSet representing a transaction of a, b, c, and d.
      * @param s The string to be converted to an item set
-     * @param delimiter
+     * @param delimiter Delimiter to split the string by
      * @return The item set corresponding to the string
      */
     private ItemSet<String> itemSetFromLine(String s, String delimiter) {
@@ -127,16 +131,12 @@ public class RareItemSetMiner implements Serializable {
     private static final FlatMapFunction<String, String> NEW_LINE_SPLIT = s -> Arrays.asList(s.split("\n"));
 
     public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Please provide the input file full path as argument, and the output folder path");
-            System.exit(0);
-        }
 
         RareItemSetMiner rareItemSetMiner = new RareItemSetMiner();
 
 //        rareItemSetMiner.runAnalysis(args[0], args[1], 0, 10, 2, 10);
 //        rareItemSetMiner.runAnalysisSocket(0, 10);
-        rareItemSetMiner.runGroceries(100, 10000, 2, 10);
+        rareItemSetMiner.runGroceries(1, 10, 2, 3);
 
     }
 
