@@ -30,7 +30,8 @@ public class RareItemSetMiner implements Serializable {
         this.itemSetMiner = new FPItemSetMiner<>(String.class);
     }
 
-    private void runAnalysis(String inputFileName, String outputDir, int minThreshold, int maxThreshold) {
+    private void runAnalysis(String inputFileName, String outputDir, int minThreshold, int maxThreshold,
+                             int minSize, int maxSize) {
 
         // Setup the Spark contextBe
         SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
@@ -45,7 +46,7 @@ public class RareItemSetMiner implements Serializable {
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map((Function<String, ItemSet<String>>) (s) -> itemSetFromLine(s, " "));
         itemSetJavaRDD.collect().forEach(miner::addItemSet);
-        Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold);
+        Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold, minSize, maxSize);
 
         // Create a DStream that will connect to hostname:port, like localhost:9999
         // JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
@@ -55,7 +56,7 @@ public class RareItemSetMiner implements Serializable {
         System.out.println("Result: " + result);
     }
 
-    private void runGroceries(int minThreshold, int maxThreshold) {
+    private void runGroceries(int minThreshold, int maxThreshold, int minSize, int maxSize) {
         // Setup the Spark contextBe
         SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
         //JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
@@ -69,7 +70,7 @@ public class RareItemSetMiner implements Serializable {
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map(s -> itemSetFromLine(s, ","));
         itemSetJavaRDD.collect().forEach(miner::addItemSet);
-        Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold);
+        Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold, minSize, maxSize);
 
         // Create a DStream that will connect to hostname:port, like localhost:9999
         // JavaReceiverInputDStream<String> lines = jssc.socketTextStream("localhost", 9999);
@@ -79,7 +80,7 @@ public class RareItemSetMiner implements Serializable {
         System.out.println("Result: " + result);
     }
 
-    private void runAnalysisSocket(int minThreshold, int maxThreshold) {
+    private void runAnalysisSocket(int minThreshold, int maxThreshold, int minSize, int maxSize) {
 
         // Setup the Spark contextBe
         SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
@@ -96,7 +97,7 @@ public class RareItemSetMiner implements Serializable {
 
             System.out.println("Testing...");
             itemSetJavaRDD.collect().forEach(miner::addItemSet);
-            Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold);
+            Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold, minSize, maxSize);
 
             System.out.println("Result: " + result);
         });
@@ -133,9 +134,9 @@ public class RareItemSetMiner implements Serializable {
 
         RareItemSetMiner rareItemSetMiner = new RareItemSetMiner();
 
-//        rareItemSetMiner.runAnalysis(args[0], args[1], 0, 10);
+//        rareItemSetMiner.runAnalysis(args[0], args[1], 0, 10, 2, 10);
 //        rareItemSetMiner.runAnalysisSocket(0, 10);
-        rareItemSetMiner.runGroceries(100, 10000);
+        rareItemSetMiner.runGroceries(100, 10000, 2, 10);
 
     }
 

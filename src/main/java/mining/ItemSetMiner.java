@@ -19,7 +19,7 @@ public interface ItemSetMiner<Type> {
      * @param maxThreshold Upper bound on item set support
      * @return Set of item sets with frequencies within threshold boundaries
      */
-    Set<ItemSet<Type>> mine(int minThreshold, int maxThreshold);
+    Set<ItemSet<Type>> mine(int minThreshold, int maxThreshold, int minSize, int maxSize);
 
 
 }

@@ -257,6 +257,12 @@ public class FPTree<Type> implements Serializable {
     }
 
     /**
+     * Gets the support of the root (the support of the itemset that this tree is conditional upon)
+     * @return Support of the root
+     */
+    public int getRootSupport() { return this.root.support;}
+
+    /**
      * Does this tree contain the given item in any nodes?
      * @param item The item that we want to know is contained by the tree
      * @return true if the item is in the tree, false otherwise

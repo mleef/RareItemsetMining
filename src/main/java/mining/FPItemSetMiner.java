@@ -12,6 +12,9 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
     private int MIN_THRESHOLD;
     private int MAX_THRESHOLD;
 
+    private int MIN_SIZE;
+    private int MAX_SIZE;
+
     private FPTree<Type> tree;
     private ItemGenerator<Type> generator;
 
@@ -36,10 +39,13 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
      * Mines tree for frequent/infrequent item sets
      * @return Set of item sets with frequencies within threshold boundaries
      */
-    public Set<ItemSet<Type>> mine(int minThreshold, int maxThreshold) {
+    public Set<ItemSet<Type>> mine(int minThreshold, int maxThreshold, int minSize, int maxSize) {
         this.tree.build();
         this.MIN_THRESHOLD = minThreshold;
         this.MAX_THRESHOLD = maxThreshold;
+
+        this.MIN_SIZE = minSize;
+        this.MAX_SIZE = maxSize;
 
         Set<ItemSet<Type>> result = new HashSet<>();
         // populate result with item sets within bounds
@@ -60,8 +66,13 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
                       FPTree<Type> conditionalTree,  Set<ItemSet<Type>> resultItemSets) {
 
         // if the current conditional tree IS a conditional tree, add the set which it is conditional upon
-        if (!currentSuffix.isEmpty())
+        if (!currentSuffix.isEmpty() && currentSuffix.size() >= MIN_SIZE) {
+            ItemSet<Type> suffixSet = generator.newItemSet(currentSuffix);
+            suffixSet.setSupport(conditionalTree.getRootSupport());
             resultItemSets.add(generator.newItemSet(currentSuffix));
+        }
+        if (currentSuffix.size() >= MAX_SIZE)
+            return;
 
         // In the base case of a single path, we generate all subsets of the items along that path
         if(conditionalTree.hasSinglePath()) {
@@ -73,17 +84,21 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
             for (Item<Type> item : conditionalTree.items()) {
                 ArrayList<ItemSet<Type>> newSetsThisIter = new ArrayList<>();
                 for (ItemSet<Type> itemset : allItemSetsInPath) {
-                    ItemSet<Type> newSet = new ItemSet<>(itemset);
-                    newSet.add(item);
-                    newSetsThisIter.add(newSet);
+                    if (itemset.size() < MAX_SIZE) {
+                        ItemSet<Type> newSet = new ItemSet<>(itemset);
+                        newSet.add(item);
+                        newSetsThisIter.add(newSet);
+                    }
                 }
                 allItemSetsInPath.addAll(newSetsThisIter);
             }
             allItemSetsInPath.remove(baseSet); // baseSet was only included for suffixing the generated sets
 
-            for (ItemSet<Type> itemset : allItemSetsInPath)
+            for (ItemSet<Type> itemset : allItemSetsInPath) {
                 itemset.setSupportFromPath(conditionalTree);
-            resultItemSets.addAll(allItemSetsInPath);
+                if (itemset.size() >= MIN_SIZE)
+                    resultItemSets.add(itemset);
+            }
             return;
         }
 
@@ -153,7 +168,7 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
         miner.addItemSet(is6);
 
         System.out.println("Patterns found:");
-        for(ItemSet<Character> pattern : miner.mine(3, 10)) {
+        for(ItemSet<Character> pattern : miner.mine(3, 10, 1, 2)) {
             System.out.println(pattern);
         }
 
