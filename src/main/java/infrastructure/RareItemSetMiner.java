@@ -1,9 +1,6 @@
 package infrastructure;
 
-import mining.FPItemSetMiner;
-import mining.Item;
-import mining.ItemSet;
-import mining.ItemSetMiner;
+import mining.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -110,6 +107,29 @@ public class RareItemSetMiner implements Serializable {
         context.awaitTermination();
     }
 
+    public void runHMinerExample(double minSupport) {
+
+        // Setup the Spark contextBe
+        SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
+        //JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
+        JavaSparkContext context = new JavaSparkContext(conf);
+
+        // Setup the miner
+        ItemSetMiner<String> hMiner = new HMiner<>(minSupport);
+
+        // Perform the mappings
+        JavaRDD<String> file = context.textFile("data/hminer.dat");
+        JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
+        JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map((Function<String, ItemSet<String>>) (s) -> itemSetFromLine(s, " "));
+        itemSetJavaRDD.collect().forEach(hMiner::addItemSet);
+        Set<ItemSet<String>> result = hMiner.mine(0, 0, 0, 0);
+
+        for(ItemSet<String> items : result) {
+            System.out.println(items);
+        }
+
+    }
+
     /**
      * Converts a string of the form "a b c d" into the ItemSet representing a transaction of a, b, c, and d.
      * @param s The string to be converted to an item set
@@ -136,7 +156,8 @@ public class RareItemSetMiner implements Serializable {
 
 //        rareItemSetMiner.runAnalysis(args[0], args[1], 0, 10, 2, 10);
 //        rareItemSetMiner.runAnalysisSocket(0, 10);
-        rareItemSetMiner.runGroceries(1, 10, 2, 3);
+//        rareItemSetMiner.runGroceries(1, 10, 2, 3);
+        rareItemSetMiner.runHMinerExample(0.4);
 
     }
 

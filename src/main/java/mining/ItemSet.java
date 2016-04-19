@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Created by marcleef on 3/29/16.
@@ -33,6 +34,18 @@ public class ItemSet<Type> extends HashSet<Item<Type>> implements Serializable {
         this.support = that.support;
         for (Item<Type> item : that)
             this.add(item);
+    }
+
+    public ItemSet(List<Item<Type>> items) {
+        super();
+        Class<Type> type1;
+        this.type = items.get(0).getType();
+        for (Item<Type> item : items) {
+            this.add(item);
+        }
+
+        //TODO I am not sure how to count this here!
+        this.support = 0;
     }
 
     @Override
