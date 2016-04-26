@@ -2,6 +2,7 @@ package infrastructure;
 
 import mining.*;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.*;
@@ -9,6 +10,7 @@ import org.apache.spark.streaming.Durations;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
+import scala.Tuple2;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -23,7 +25,7 @@ public class RareItemSetMiner implements Serializable {
     //NOTE Can we assume it will always be string?
     private ItemSetMiner<String> itemSetMiner;
 
-    public RareItemSetMiner() {
+    private RareItemSetMiner() {
         this.itemSetMiner = new FPItemSetMiner<>(String.class);
     }
 
@@ -81,6 +83,31 @@ public class RareItemSetMiner implements Serializable {
         }
     }
 
+    private void runNetFlow(int minThreshold, int maxThreshold, int minSize, int maxSize) {
+        // Setup the Spark contextBe
+        SparkConf conf = new SparkConf().setAppName("edu.princeton.cos598e.rareitemset").setMaster("local");
+        //JavaStreamingContext jssc = new JavaStreamingContext(conf, Durations.seconds(1));
+        JavaSparkContext context = new JavaSparkContext(conf);
+
+        // Setup the miner
+        FPItemSetMiner<String> miner = new FPItemSetMiner<>(String.class);
+
+        // Perform the mappings
+        JavaRDD<String> file = context.textFile("data/2013-02-27.10000.csv");
+        JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
+        JavaRDD<ItemSet<String>> srcTups = stringJavaRDD.mapToPair((PairFunction<String, String, String>) s -> {
+            String[] splitLine = s.split(",");
+            return new Tuple2<>(splitLine[2], splitLine[3]);
+        }).groupByKey().map(s -> itemSetFromLine(s._2()));
+
+        srcTups.collect().forEach(miner::addItemSet);
+        Set<ItemSet<String>> result = miner.mine(minThreshold, maxThreshold, minSize, maxSize);
+
+        for(ItemSet<String> items : result) {
+            System.out.println(items);
+        }
+    }
+
     private void runAnalysisSocket(int minThreshold, int maxThreshold, int minSize, int maxSize) {
 
         // Setup the Spark contextBe
@@ -115,7 +142,7 @@ public class RareItemSetMiner implements Serializable {
         JavaSparkContext context = new JavaSparkContext(conf);
 
         // Setup the miner
-        ItemSetMiner<String> hMiner = new HMiner<>(minSupport);
+        ItemSetMiner<String> hMiner = new HMiner<>(minSupport, 1);
 
         // Perform the mappings
         JavaRDD<String> file = context.textFile("data/hminer.dat");
@@ -148,6 +175,23 @@ public class RareItemSetMiner implements Serializable {
         return itemSet;
     }
 
+    /**
+     * Converts an iterable of strings of the form "a b c d" into the ItemSet representing a transaction of a, b, c, and d.
+     * @param s The iterable of strings to be converted to an item set
+     * @return The item set corresponding to the string
+     */
+    private ItemSet<String> itemSetFromLine(Iterable<String> s) {
+
+        ItemSet<String> itemSet = new ItemSet<>(String.class);
+
+        for (String item : s) {
+            itemSet.add(new Item<>(item, String.class));
+        }
+
+        return itemSet;
+    }
+
+
     private static final FlatMapFunction<String, String> NEW_LINE_SPLIT = s -> Arrays.asList(s.split("\n"));
 
     public static void main(String[] args) {
@@ -156,8 +200,9 @@ public class RareItemSetMiner implements Serializable {
 
 //        rareItemSetMiner.runAnalysis(args[0], args[1], 0, 10, 2, 10);
 //        rareItemSetMiner.runAnalysisSocket(0, 10);
-//        rareItemSetMiner.runGroceries(1, 10, 2, 3);
-        rareItemSetMiner.runHMinerExample(0.4);
+        //rareItemSetMiner.runGroceries(1, 10, 2, 3);
+        rareItemSetMiner.runNetFlow(1, 4, 1, 10);
+        //rareItemSetMiner.runHMinerExample(0.4);
 
     }
 

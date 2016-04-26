@@ -40,6 +40,9 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
      * @return Set of item sets with frequencies within threshold boundaries
      */
     public Set<ItemSet<Type>> mine(int minThreshold, int maxThreshold, int minSize, int maxSize) {
+        if(minThreshold < 1 || minSize < 1) {
+            throw new IllegalArgumentException("Minimum values must be greater than 1");
+        }
         this.tree.build();
         this.MIN_THRESHOLD = minThreshold;
         this.MAX_THRESHOLD = maxThreshold;
@@ -64,7 +67,6 @@ public class FPItemSetMiner<Type> implements ItemSetMiner<Type>, Serializable {
 
     private void mine(ArrayList<Item<Type>> currentSuffix,
                       FPTree<Type> conditionalTree,  Set<ItemSet<Type>> resultItemSets) {
-
         // if the current conditional tree IS a conditional tree, add the set which it is conditional upon
         if (!currentSuffix.isEmpty() && currentSuffix.size() >= MIN_SIZE) {
             ItemSet<Type> suffixSet = generator.newItemSet(currentSuffix);
