@@ -93,11 +93,11 @@ public class RareItemSetMiner implements Serializable {
         FPItemSetMiner<String> miner = new FPItemSetMiner<>(String.class);
 
         // Perform the mappings
-        JavaRDD<String> file = context.textFile("data/2013-02-27.10000.csv");
+        JavaRDD<String> file = context.textFile("data/2013-02-27.100000.csv");
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> srcTups = stringJavaRDD.mapToPair((PairFunction<String, String, String>) s -> {
             String[] splitLine = s.split(",");
-            return new Tuple2<>(splitLine[2], splitLine[3]);
+            return new Tuple2<>(splitLine[2], splitLine[5]);
         }).groupByKey().map(s -> itemSetFromLine(s._2()));
 
         srcTups.collect().forEach(miner::addItemSet);
@@ -201,7 +201,7 @@ public class RareItemSetMiner implements Serializable {
 //        rareItemSetMiner.runAnalysis(args[0], args[1], 0, 10, 2, 10);
 //        rareItemSetMiner.runAnalysisSocket(0, 10);
         //rareItemSetMiner.runGroceries(1, 10, 2, 3);
-        rareItemSetMiner.runNetFlow(1, 4, 1, 10);
+        rareItemSetMiner.runNetFlow(5, 10, 2, 10);
         //rareItemSetMiner.runHMinerExample(0.4);
 
     }
