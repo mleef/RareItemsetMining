@@ -9,16 +9,22 @@ import java.util.stream.Collectors;
  */
 public class HMiner<T> implements ItemSetMiner<T> {
 
-    private HashMap<ItemSet<T>, HashNode<T>> synopsis;
+    /**
+     * This is called $m$ in the paper.
+     */
+    private final int hashTableSize;
+    private final Map<Integer, HashNode<T>> synopsis;
+    private final double minSupport;
     private int N;
-    private double minSupport;
 
     /**
      * Construct a miner for a data stream
      * @param minSupport - The procentage of the stream that should contain an itemset before it is considered frequent
+     * @param hashTableSize - The size of the hashtable, this will be final and not resized.
      */
-    public HMiner(double minSupport) {
-        this.synopsis = new HashMap<>();
+    public HMiner(double minSupport, int hashTableSize) {
+        this.hashTableSize = hashTableSize;
+        this.synopsis = new HashMap<>(hashTableSize);
         this.N = 0;
         this.minSupport = minSupport;
 
@@ -98,12 +104,14 @@ public class HMiner<T> implements ItemSetMiner<T> {
      * @return
      */
     private HashNode<T> getHashNodeForItemSet(ItemSet<T> itemSet) {
-        HashNode<T> hashNode = synopsis.get(itemSet);
+        int hashIndex = itemSet.hashCode() % this.hashTableSize;
+
+        HashNode<T> hashNode = synopsis.get(hashIndex);
 
         // Create node if it doesn't exist
         if(hashNode == null) {
             hashNode = new HashNode<>(0, N);
-            synopsis.put(itemSet, hashNode);
+            synopsis.put(hashIndex, hashNode);
         }
 
         return hashNode;
@@ -162,11 +170,11 @@ public class HMiner<T> implements ItemSetMiner<T> {
 
     /**
      * A simple utility method to check if the synopsis contains a frequent node for a specific set.
-     * @param itemSet
-     * @return
+     * @param itemSet the itemset to check if exist
+     * @return true if there exists an fNode for the itemset
      */
     private boolean hasFNodeForItemSet(ItemSet<T> itemSet) {
-        HashNode<T> hashNode = synopsis.get(itemSet);
+        HashNode<T> hashNode = getHashNodeForItemSet(itemSet);
         return hashNode != null && hashNode.getNodeForItemSet(itemSet) != null;
     }
 
@@ -178,7 +186,6 @@ public class HMiner<T> implements ItemSetMiner<T> {
         Set<ItemSet<T>> result = new HashSet<>();
 
         for (HashNode<T> hashNode : synopsis.values()) {
-
             result.addAll(
                     hashNode.getFrequentNodes().stream()
                             .filter(fNode -> minThreshold < fNode.getEstimateCount() + fNode.getTrueCount())
@@ -302,7 +309,8 @@ class FrequentNode<T> {
     }
 
     ItemSet<T> getItemSet() {
-        return itemSet;
+        this.itemSet.setSupport(this.getTrueCount() + this.getEstimateCount());
+        return this.itemSet;
     }
 
     int getTrueCount() {
