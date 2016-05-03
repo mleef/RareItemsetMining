@@ -17,13 +17,17 @@ public class HMiner<T> implements ItemSetMiner<T> {
     private final double minSupport;
     private int N;
 
+
+    private final boolean debugMode;
     /**
      * Construct a miner for a data stream
      * @param minSupport - The procentage of the stream that should contain an itemset before it is considered frequent
      * @param hashTableSize - The size of the hashtable, this will be final and not resized.
+     * @param debugMode - If we are in debug mode then we will print information
      */
-    public HMiner(double minSupport, int hashTableSize) {
+    public HMiner(double minSupport, int hashTableSize, boolean debugMode) {
         this.hashTableSize = hashTableSize;
+        this.debugMode = debugMode;
         this.synopsis = new HashMap<>(hashTableSize);
         this.N = 0;
         this.minSupport = minSupport;
@@ -36,7 +40,7 @@ public class HMiner<T> implements ItemSetMiner<T> {
 
         SubsetIterator<Item<T>> subsets = new SubsetIterator<>(itemSet);
 
-        System.out.println("\nAdding itemset: " + itemSet);
+        System.out.println("\nAdding itemset: " + itemSet + "\nsize: " + itemSet.size());
 
         N++;
 
@@ -47,8 +51,10 @@ public class HMiner<T> implements ItemSetMiner<T> {
             }
             ItemSet<T> tItemSet = new ItemSet<>(next);
 
-            System.out.println("subset: " + tItemSet);
-
+            if(debugMode) {
+                System.out.println("subset: " + tItemSet);
+            }
+    
             HashNode<T> hashNode = getHashNodeForItemSet(tItemSet);
 
             hashNode.incrementTotalAccess();
@@ -72,18 +78,21 @@ public class HMiner<T> implements ItemSetMiner<T> {
                     }
                 }
 
-                System.out.println("synopsis: " + synopsis);
-                System.out.println("ImmediateSubsets: " + allImmediateSubsets);
-                System.out.println("Has all subsets = " + hasAllSubsets);
+                if(debugMode) {
+                    System.out.println("synopsis: " + synopsis);
+                    System.out.println("ImmediateSubsets: " + allImmediateSubsets);
+                    System.out.println("Has all subsets = " + hasAllSubsets);
+                }
 
                 if(hasAllSubsets) {
 
                     int estimateCount = computeEstimateCount(tItemSet);
 
-                    System.out.println("Estimate for " + tItemSet + " is " + estimateCount);
+                    if(debugMode) {
+                        System.out.println("Estimate for " + tItemSet + " is " + estimateCount);
+                    }
 
                     if (estimateCount + 1 > minSupport * N) {
-                        System.out.println("Adding itemset");
                         FrequentNode<T> tFrequentNode = new FrequentNode<>(tItemSet, 1, estimateCount);
                         hashNode.addFrequentNodes(tFrequentNode);
                     }
@@ -181,7 +190,9 @@ public class HMiner<T> implements ItemSetMiner<T> {
     @Override
     public Set<ItemSet<T>> mine(int minThreshold, int maxThreshold, int minSize, int maxSize) {
         System.out.println("NOTE - Ignoring minThreshold, maxThreshold, minSize, and maxSize. The threashold has to be set when the miner is created!");
-        System.out.println("Synopsis: " + synopsis);
+        if(debugMode) {
+            System.out.println("Synopsis: " + synopsis);
+        }
 
         Set<ItemSet<T>> result = new HashSet<>();
 
@@ -243,7 +254,6 @@ class HashNode<T> {
             System.out.println("Testing: " + (frequentNode.getTrueCount() + frequentNode.getEstimateCount()) + " < " + threashold);
 
             if(frequentNode.getTrueCount() + frequentNode.getEstimateCount() < threashold) {
-                System.out.println("Removing node");
                 iterator.remove();
             }
         }
