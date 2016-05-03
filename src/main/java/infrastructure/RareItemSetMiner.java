@@ -166,13 +166,17 @@ public class RareItemSetMiner implements Serializable {
         JavaSparkContext context = new JavaSparkContext(conf);
 
         // Setup the miner
-        ItemSetMiner<String> hMiner = new HMiner<>(minSupport, 1, false);
+        ItemSetMiner<String> hMiner = new HMiner<>(minSupport, 1, true);
+//        ItemSetMiner<String> hMiner = new HMiner<>(minSupport, 0.1, 0.9, 4, 10, false);
+
+
 
         // Perform the mappings
         JavaRDD<String> file = context.textFile("data/hminer.dat");
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map((Function<String, ItemSet<String>>) (s) -> itemSetFromLine(s, " "));
         itemSetJavaRDD.collect().forEach(hMiner::addItemSet);
+//        System.out.println("MEMORY USAGE: " + sigar.getMem().getActualUsed());
         Set<ItemSet<String>> result = hMiner.mine(0, 0, 0, 0);
 
         for(ItemSet<String> items : result) {
@@ -226,7 +230,7 @@ public class RareItemSetMiner implements Serializable {
 //        rareItemSetMiner.runAnalysisSocket(0, 10);
 //        rareItemSetMiner.runGroceries(1, 10, 2, 3);
 //        rareItemSetMiner.runNetFlow(5, 10, 2, 10);
-//        rareItemSetMiner.runHMinerExample(0.4);
+        rareItemSetMiner.runHMinerExample(0.4);
 
     }
 

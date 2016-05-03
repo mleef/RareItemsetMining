@@ -51,12 +51,19 @@ public class HMiner<T> implements ItemSetMiner<T> {
                   double averageTransactionLength,
                   double numberOfDiffertItems,
                   boolean debugMode) {
+        double temp = Math.ceil(Math.E / (errorParam * errorParam) * numberOfDiffertItems * (Math.exp(averageTransactionLength) - 1)
+                * Math.log((1-Math.pow(2, numberOfDiffertItems)) / Math.log(confidence)));
+        System.out.println("Calculated m : " + temp);
         this.hashTableSize = (int) Math.ceil(Math.E / (errorParam*errorParam) * numberOfDiffertItems * (Math.exp(averageTransactionLength) - 1)
                 * Math.log((1-Math.pow(2, numberOfDiffertItems)) / Math.log(confidence)));
         this.minSupport = minSupport;
         this.debugMode = debugMode;
         this.synopsis = new HashMap<>(hashTableSize);
         this.N = 0;
+
+        if(debugMode) {
+            System.out.println("Hash table size: " + this.hashTableSize);
+        }
     }
 
     @Override
@@ -65,9 +72,15 @@ public class HMiner<T> implements ItemSetMiner<T> {
 
         SubsetIterator<Item<T>> subsets = new SubsetIterator<>(itemSet);
 
-        System.out.println("\nAdding itemset: " + itemSet + "\nsize: " + itemSet.size());
+        if(debugMode) {
+            System.out.println("\nAdding itemset: " + itemSet + "\nsize: " + itemSet.size());
+        }
 
         N++;
+
+        if(N % 25 == 0) {
+            System.out.println("Adding itemset number " + N);
+        }
 
         while(subsets.hasNext()) {
             List<Item<T>> next = subsets.next();
@@ -104,7 +117,6 @@ public class HMiner<T> implements ItemSetMiner<T> {
                 }
 
                 if(debugMode) {
-                    System.out.println("synopsis: " + synopsis);
                     System.out.println("ImmediateSubsets: " + allImmediateSubsets);
                     System.out.println("Has all subsets = " + hasAllSubsets);
                 }
@@ -123,6 +135,10 @@ public class HMiner<T> implements ItemSetMiner<T> {
                     }
                 }
             }
+        }
+
+        if(debugMode) {
+            System.out.println("synopsis: " + synopsis);
         }
 
         // Maintain the invariant
@@ -234,134 +250,3 @@ public class HMiner<T> implements ItemSetMiner<T> {
 }
 
 
-/**
- * Used to represent the node in the hash map.
- * @param <T> The type of Items stored in the Item Sets
- */
-class HashNode<T> {
-
-    private int totalAccess;
-    private int lastAccess;
-    private List<FrequentNode<T>> frequentNodes;
-
-    HashNode(int totalAccess, int lastAccess) {
-        this.totalAccess = totalAccess;
-        this.lastAccess = lastAccess;
-        this.frequentNodes = new LinkedList<>();
-    }
-
-    void setLastAccess(int lastAccess) {
-        this.lastAccess = lastAccess;
-    }
-
-    void incrementTotalAccess() {
-        this.totalAccess += 1;
-    }
-
-    void addFrequentNodes(FrequentNode<T> frequentNodes) {
-        this.frequentNodes.add(frequentNodes);
-    }
-
-    FrequentNode<T> getNodeForItemSet(ItemSet<T> itemSet) {
-        for (FrequentNode<T> frequentNode : this.frequentNodes) {
-            if(frequentNode.getItemSet().equals(itemSet)) {
-                return frequentNode;
-            }
-        }
-
-        return null;
-    }
-
-    void removeFNodeBelowThreashold(double threashold) {
-        for (Iterator<FrequentNode<T>> iterator = this.frequentNodes.iterator(); iterator.hasNext(); ) {
-            FrequentNode<T> frequentNode = iterator.next();
-
-            System.out.println("Testing: " + (frequentNode.getTrueCount() + frequentNode.getEstimateCount()) + " < " + threashold);
-
-            if(frequentNode.getTrueCount() + frequentNode.getEstimateCount() < threashold) {
-                iterator.remove();
-            }
-        }
-    }
-
-    int getTotalTrueCount() {
-        int totalTrueCount = 0;
-        for (FrequentNode<T> frequentNode : this.frequentNodes) {
-            totalTrueCount += frequentNode.getTrueCount();
-        }
-        return  totalTrueCount;
-    }
-
-    int getTotalEstimateCount() {
-        int totaleEstimateCount = 0;
-        for (FrequentNode<T> frequentNode : this.frequentNodes) {
-            totaleEstimateCount += frequentNode.getEstimateCount();
-        }
-        return totaleEstimateCount;
-    }
-
-    int getTotalAccess() {
-        return totalAccess;
-    }
-
-    int getLastAccess() {
-        return lastAccess;
-    }
-
-    List<FrequentNode<T>> getFrequentNodes() {
-        return frequentNodes;
-    }
-
-    @Override
-    public String toString() {
-        return "HashNode{" +
-                "totalAccess=" + totalAccess +
-                ", lastAccess=" + lastAccess +
-                ", frequentNodes=" + frequentNodes +
-                '}';
-    }
-}
-
-
-/**
- * Representing a single item set
- * @param <T>
- */
-class FrequentNode<T> {
-
-    private ItemSet<T> itemSet;
-    private int trueCount;
-    private int estimateCount;
-
-    FrequentNode(ItemSet<T> itemSet, int trueCount, int estimateCount) {
-        this.itemSet = itemSet;
-        this.trueCount = trueCount;
-        this.estimateCount = estimateCount;
-    }
-
-    void incrementTrueCount() {
-        this.trueCount += 1;
-    }
-
-    ItemSet<T> getItemSet() {
-        this.itemSet.setSupport(this.getTrueCount() + this.getEstimateCount());
-        return this.itemSet;
-    }
-
-    int getTrueCount() {
-        return trueCount;
-    }
-
-    int getEstimateCount() {
-        return estimateCount;
-    }
-
-    @Override
-    public String toString() {
-        return "FrequentNode{" +
-                "itemSet=" + itemSet +
-                ", trueCount=" + trueCount +
-                ", estimateCount=" + estimateCount +
-                '}';
-    }
-}
