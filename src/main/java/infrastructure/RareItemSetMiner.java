@@ -113,7 +113,7 @@ public class RareItemSetMiner implements Serializable {
         JavaSparkContext context = new JavaSparkContext(conf);
 
         // Setup the miner
-        HMiner<String> miner = new HMiner<>(minSupport, hashTableSize, debugMode);
+        HMiner<String> miner = new HMiner<>(minSupport, hashTableSize, false);
 
         // Perform the mappings
         JavaRDD<String> file = context.textFile("data/2013-02-27.10000.csv");
