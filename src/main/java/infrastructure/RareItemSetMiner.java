@@ -176,7 +176,6 @@ public class RareItemSetMiner implements Serializable {
         JavaRDD<String> stringJavaRDD = file.flatMap(NEW_LINE_SPLIT);
         JavaRDD<ItemSet<String>> itemSetJavaRDD = stringJavaRDD.map((Function<String, ItemSet<String>>) (s) -> itemSetFromLine(s, " "));
         itemSetJavaRDD.collect().forEach(hMiner::addItemSet);
-//        System.out.println("MEMORY USAGE: " + sigar.getMem().getActualUsed());
         Set<ItemSet<String>> result = hMiner.mine(0, 0, 0, 0);
 
         for(ItemSet<String> items : result) {
