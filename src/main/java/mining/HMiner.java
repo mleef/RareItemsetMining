@@ -1,6 +1,8 @@
 package mining;
 
 
+import org.apache.commons.collections.map.HashedMap;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +34,29 @@ public class HMiner<T> implements ItemSetMiner<T> {
         this.N = 0;
         this.minSupport = minSupport;
 
+    }
+
+    /**
+     * construct a miner for a data stream, using information about the stream to provide the theoretical guarantees.
+     * @param minSupport - min support \sigma in the paper
+     * @param errorParam - error \varepsilon in the paper
+     * @param confidence - confidence \rho in the paper
+     * @param averageTransactionLength - average length of transactions in the stream L in the paper
+     * @param numberOfDiffertItems - number of different items present in the data stream M in the paper
+     * @param debugMode - If we are in debug mode then we will print extra information
+     */
+    public HMiner(double minSupport,
+                  double errorParam,
+                  double confidence,
+                  double averageTransactionLength,
+                  double numberOfDiffertItems,
+                  boolean debugMode) {
+        this.hashTableSize = (int) Math.ceil(Math.E / (errorParam*errorParam) * numberOfDiffertItems * (Math.exp(averageTransactionLength) - 1)
+                * Math.log((1-Math.pow(2, numberOfDiffertItems)) / Math.log(confidence)));
+        this.minSupport = minSupport;
+        this.debugMode = debugMode;
+        this.synopsis = new HashMap<>(hashTableSize);
+        this.N = 0;
     }
 
     @Override
